@@ -1,0 +1,12 @@
+{% if pagina.paginator.num_pages > 1 %}
+<nav class="paginacion" aria-label="Paginación">
+  {% if pagina.has_previous %}
+    <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if filtro %}filtro={{ filtro }}&{% endif %}{% if estado %}estado={{ estado }}&{% endif %}{% if tipo %}tipo={{ tipo }}&{% endif %}pagina={{ pagina.previous_page_number }}">Anterior</a>
+  {% endif %}
+  <span class="actual">{{ pagina.number }} / {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}
+    <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if filtro %}filtro={{ filtro }}&{% endif %}{% if estado %}estado={{ estado }}&{% endif %}{% if tipo %}tipo={{ tipo }}&{% endif %}pagina={{ pagina.next_page_number }}">Siguiente</a>
+  {% endif %}
+  <span class="resumen">{{ pagina.paginator.count }} registros</span>
+</nav>
+{% endif %}

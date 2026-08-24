@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load moneda %}
+
+{% block titulo %}Tablero{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> Tejas Santa Ana S.A.S</p>
+    <h1>Tablero de planta</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-secundario" href="{% url 'movimiento_crear' %}">Registrar movimiento</a>
+    <a class="boton boton-primario" href="{% url 'pedido_crear' %}">Nuevo pedido</a>
+  </div>
+</header>
+
+<section class="kpis" aria-label="Indicadores">
+  <div class="kpi">
+    <p class="etiqueta"><span class="rombo"></span>Productos activos</p>
+    <p class="cifra">{{ total_productos }}</p>
+    <p class="detalle">{{ unidades_totales|miles }} unidades en patio</p>
+  </div>
+  <div class="kpi">
+    <p class="etiqueta"><span class="rombo"></span>Valor del inventario</p>
+    <p class="cifra">{{ valor_total|cop }}</p>
+    <p class="detalle">a precio de venta</p>
+  </div>
+  <div class="kpi">
+    <p class="etiqueta"><span class="rombo"></span>Pedidos pendientes</p>
+    <p class="cifra">{{ pendientes }}</p>
+    <p class="detalle">{{ en_proceso }} en proceso de entrega</p>
+  </div>
+  <div class="kpi {% if stock_bajo_total %}kpi-alerta{% endif %}">
+    <p class="etiqueta"><span class="rombo"></span>Stock bajo</p>
+    <p class="cifra">{{ stock_bajo_total }}</p>
+    <p class="detalle">referencias por debajo del mínimo</p>
+  </div>
+</section>
+
+<div class="panel-doble">
+  <section class="tarjeta">
+    <div class="tarjeta-cabeza">
+      <h2><span class="rombo"></span>Stock por reponer</h2>
+      <a class="ver-todo" href="{% url 'productos_lista' %}?filtro=bajo">Ver todo</a>
+    </div>
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead>
+          <tr><th>Producto</th><th class="num">Stock</th><th class="num">Mínimo</th></tr>
+        </thead>
+        <tbody>
+          {% for producto in stock_bajo %}
+          <tr>
+            <td class="celda-principal">
+              <a href="{% url 'producto_detalle' producto.pk %}">{{ producto.nombre }}</a>
+              <span class="sub mono">{{ producto.sku }}</span>
+            </td>
+            <td class="num stock-bajo">{{ producto.stock|miles }}</td>
+            <td class="num texto-suave">{{ producto.stock_minimo|miles }}</td>
+          </tr>
+          {% empty %}
+          <tr class="fila-vacia"><td colspan="3">Ninguna referencia está por debajo del mínimo.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tarjeta">
+    <div class="tarjeta-cabeza">
+      <h2><span class="rombo"></span>Pedidos recientes</h2>
+      <a class="ver-todo" href="{% url 'pedidos_lista' %}">Ver todo</a>
+    </div>
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead>
+          <tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th class="num">Total</th></tr>
+        </thead>
+        <tbody>
+          {% for pedido in ultimos_pedidos %}
+          <tr>
+            <td class="mono"><a href="{% url 'pedido_detalle' pedido.pk %}">{{ pedido.numero }}</a></td>
+            <td>{{ pedido.cliente.nombre|truncatechars:26 }}</td>
+            <td><span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span></td>
+            <td class="num">{{ pedido.total|cop }}</td>
+          </tr>
+          {% empty %}
+          <tr class="fila-vacia">
+            <td colspan="4">
+              Aún no hay pedidos.<br>
+              <a class="boton boton-primario boton-mini" href="{% url 'pedido_crear' %}">Crear el primero</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<section class="tarjeta">
+  <div class="tarjeta-cabeza">
+    <h2><span class="rombo"></span>Últimos movimientos</h2>
+    <a class="ver-todo" href="{% url 'movimientos_lista' %}">Ver todo</a>
+  </div>
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th class="num">Cantidad</th><th>Nota</th><th>Registró</th></tr>
+      </thead>
+      <tbody>
+        {% for mov in movimientos %}
+        <tr>
+          <td class="texto-suave">{{ mov.fecha|date:'d M, g:i a' }}</td>
+          <td><span class="chip chip-{{ mov.get_tipo_display|lower }}">{{ mov.get_tipo_display }}</span></td>
+          <td class="celda-principal">
+            <a href="{% url 'producto_detalle' mov.producto.pk %}">{{ mov.producto.nombre }}</a>
+          </td>
+          <td class="num">{{ mov.efecto|miles }}</td>
+          <td class="texto-suave">{{ mov.nota|default:'—'|truncatechars:40 }}</td>
+          <td class="texto-suave">{{ mov.usuario.username|default:'—' }}</td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia"><td colspan="6">Todavía no hay movimientos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

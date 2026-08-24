@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a></p>
+    <h1>{{ titulo }}</h1>
+  </div>
+</header>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors or formset.non_form_errors %}
+    <div class="error-general">
+      {{ form.non_field_errors }}
+      {% for error in formset.non_form_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="tarjeta formulario" style="max-width:none;">
+    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Datos del pedido</h2></div>
+    <div class="tarjeta-cuerpo">
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.cliente %}
+        {% include 'partes/campo.html' with campo=form.fecha_entrega %}
+      </div>
+      {% include 'partes/campo.html' with campo=form.direccion_entrega %}
+      {% include 'partes/campo.html' with campo=form.notas %}
+    </div>
+  </section>
+
+  <section class="tarjeta separado-arriba">
+    <div class="tarjeta-cabeza">
+      <h2><span class="rombo"></span>Ítems</h2>
+      <button type="button" id="agregar-item" class="boton boton-secundario boton-mini">Agregar ítem</button>
+    </div>
+    <div class="tarjeta-cuerpo">
+      {{ formset.management_form }}
+      <div class="tabla-envoltura">
+        <table class="items-tabla" id="tabla-items">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="col-cantidad">Cantidad</th>
+              <th class="col-precio">Precio unitario</th>
+              <th class="col-quitar"><span class="visualmente-oculto"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in formset %}
+            <tr class="fila-item">
+              <td>
+                {{ f.id }}
+                {{ f.producto }}
+                {% for error in f.producto.errors %}<p class="error-campo">{{ error }}</p>{% endfor %}
+              </td>
+              <td>
+                {{ f.cantidad }}
+                {% for error in f.cantidad.errors %}<p class="error-campo">{{ error }}</p>{% endfor %}
+              </td>
+              <td>
+                {{ f.precio }}
+                {% for error in f.precio.errors %}<p class="error-campo">{{ error }}</p>{% endfor %}
+              </td>
+              <td>
+                <span style="display:none;">{{ f.DELETE }}</span>
+                <button type="button" class="quitar-fila" aria-label="Quitar ítem">×</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="ayuda texto-suave">El precio se llena solo al elegir el producto; puedes cambiarlo si negociaste otro valor.</p>
+    </div>
+  </section>
+
+  <div class="form-acciones">
+    <button type="submit" class="boton boton-primario">Guardar pedido</button>
+    <a class="boton boton-secundario" href="{% if pedido %}{% url 'pedido_detalle' pedido.pk %}{% else %}{% url 'pedidos_lista' %}{% endif %}">Cancelar</a>
+  </div>
+</form>
+
+<template id="plantilla-item">
+  <tr class="fila-item">
+    <td>{{ formset.empty_form.producto }}</td>
+    <td>{{ formset.empty_form.cantidad }}</td>
+    <td>{{ formset.empty_form.precio }}</td>
+    <td>
+      <span style="display:none;">{{ formset.empty_form.DELETE }}</span>
+      <button type="button" class="quitar-fila" aria-label="Quitar ítem">×</button>
+    </td>
+  </tr>
+</template>
+
+{{ precios|json_script:'datos-productos' }}
+{% endblock %}

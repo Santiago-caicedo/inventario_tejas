@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Nueva categoría{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'productos_lista' %}">Productos</a></p>
+    <h1>Nueva categoría</h1>
+  </div>
+</header>
+
+<section class="tarjeta formulario" style="max-width:480px;">
+  <div class="tarjeta-cuerpo">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include 'partes/campo.html' with campo=form.nombre %}
+      <div class="form-acciones">
+        <button type="submit" class="boton boton-primario">Guardar categoría</button>
+        <a class="boton boton-secundario" href="{% url 'productos_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

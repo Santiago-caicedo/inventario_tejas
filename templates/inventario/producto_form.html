@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'productos_lista' %}">Productos</a></p>
+    <h1>{{ titulo }}</h1>
+  </div>
+</header>
+
+<section class="tarjeta formulario">
+  <div class="tarjeta-cuerpo">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error-general">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.sku %}
+        {% include 'partes/campo.html' with campo=form.categoria %}
+      </div>
+      {% include 'partes/campo.html' with campo=form.nombre %}
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.unidad %}
+        {% include 'partes/campo.html' with campo=form.precio %}
+      </div>
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.stock_minimo %}
+        <div class="form-grupo">
+          <label>Stock actual</label>
+          <input class="campo" value="{% if producto %}{{ producto.stock }}{% else %}0{% endif %}" disabled>
+          <p class="ayuda">El stock solo cambia con movimientos, para dejar rastro de cada unidad.</p>
+        </div>
+      </div>
+      {% include 'partes/campo.html' with campo=form.descripcion %}
+      {% include 'partes/campo.html' with campo=form.activo %}
+
+      <div class="form-acciones">
+        <button type="submit" class="boton boton-primario">Guardar producto</button>
+        <a class="boton boton-secundario" href="{% if producto %}{% url 'producto_detalle' producto.pk %}{% else %}{% url 'productos_lista' %}{% endif %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

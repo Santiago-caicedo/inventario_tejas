@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load moneda %}
+
+{% block titulo %}Productos{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> Operación</p>
+    <h1>Productos</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-secundario" href="{% url 'categoria_crear' %}">Nueva categoría</a>
+    <a class="boton boton-primario" href="{% url 'producto_crear' %}">Nuevo producto</a>
+  </div>
+</header>
+
+<div class="filtros">
+  <nav class="pestanas" aria-label="Filtrar productos">
+    <a href="{% url 'productos_lista' %}" class="{% if not filtro %}activa{% endif %}">Activos</a>
+    <a href="{% url 'productos_lista' %}?filtro=bajo" class="{% if filtro == 'bajo' %}activa{% endif %}">Stock bajo</a>
+    <a href="{% url 'productos_lista' %}?filtro=inactivos" class="{% if filtro == 'inactivos' %}activa{% endif %}">Inactivos</a>
+  </nav>
+  <form method="get">
+    {% if filtro %}<input type="hidden" name="filtro" value="{{ filtro }}">{% endif %}
+    <input class="campo buscador" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o referencia…">
+    <select class="campo campo-select" name="categoria">
+      <option value="">Todas las categorías</option>
+      {% for cat in categorias %}
+        <option value="{{ cat.pk }}" {% if categoria_id == cat.pk|stringformat:'s' %}selected{% endif %}>{{ cat.nombre }}</option>
+      {% endfor %}
+    </select>
+    <button class="boton boton-secundario" type="submit">Filtrar</button>
+  </form>
+</div>
+
+<section class="tarjeta">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Referencia</th><th>Producto</th><th>Categoría</th><th>Unidad</th>
+          <th class="num">Precio</th><th class="num">Stock</th><th class="num">Mínimo</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in pagina %}
+        <tr>
+          <td class="mono">{{ producto.sku }}</td>
+          <td class="celda-principal"><a href="{% url 'producto_detalle' producto.pk %}">{{ producto.nombre }}</a></td>
+          <td class="texto-suave">{{ producto.categoria.nombre }}</td>
+          <td class="texto-suave">{{ producto.get_unidad_display }}</td>
+          <td class="num">{{ producto.precio|cop }}</td>
+          <td class="num {% if producto.stock_bajo %}stock-bajo{% endif %}">{{ producto.stock|miles }}</td>
+          <td class="num texto-suave">{{ producto.stock_minimo|miles }}</td>
+          <td>{% if producto.stock_bajo and producto.activo %}<span class="marca-bajo">Reponer</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="8">
+            No hay productos que coincidan con la búsqueda.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'producto_crear' %}">Crear producto</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include 'partes/paginacion.html' %}
+{% endblock %}

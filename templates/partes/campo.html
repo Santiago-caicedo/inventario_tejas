@@ -1,0 +1,13 @@
+<div class="form-grupo {% if campo.errors %}con-error{% endif %}">
+  {% if campo.field.widget.input_type == 'checkbox' %}
+    <div class="form-check-linea">
+      {{ campo }}
+      <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    </div>
+  {% else %}
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {{ campo }}
+  {% endif %}
+  {% if campo.help_text %}<p class="ayuda">{{ campo.help_text }}</p>{% endif %}
+  {% for error in campo.errors %}<p class="error-campo">{{ error }}</p>{% endfor %}
+</div>

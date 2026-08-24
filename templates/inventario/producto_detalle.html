@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load moneda %}
+
+{% block titulo %}{{ producto.nombre }}{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'productos_lista' %}">Productos</a> · <span class="mono">{{ producto.sku }}</span></p>
+    <h1>{{ producto.nombre }}</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-secundario" href="{% url 'producto_editar' producto.pk %}">Editar</a>
+    <a class="boton boton-primario" href="{% url 'movimiento_crear' %}?producto={{ producto.pk }}">Registrar movimiento</a>
+  </div>
+</header>
+
+<div class="detalle-columnas">
+  <section class="tarjeta">
+    <div class="tarjeta-cabeza">
+      <h2><span class="rombo"></span>Movimientos recientes</h2>
+      <a class="ver-todo" href="{% url 'movimientos_lista' %}">Ver todos</a>
+    </div>
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead>
+          <tr><th>Fecha</th><th>Tipo</th><th class="num">Cantidad</th><th>Nota</th><th>Registró</th></tr>
+        </thead>
+        <tbody>
+          {% for mov in movimientos %}
+          <tr>
+            <td class="texto-suave">{{ mov.fecha|date:'d M Y, g:i a' }}</td>
+            <td><span class="chip chip-{{ mov.get_tipo_display|lower }}">{{ mov.get_tipo_display }}</span></td>
+            <td class="num">{{ mov.efecto|miles }}</td>
+            <td class="texto-suave">
+              {% if mov.pedido %}<a href="{% url 'pedido_detalle' mov.pedido.pk %}" class="mono">{{ mov.pedido.numero }}</a> · {% endif %}
+              {{ mov.nota|default:'—'|truncatechars:44 }}
+            </td>
+            <td class="texto-suave">{{ mov.usuario.username|default:'—' }}</td>
+          </tr>
+          {% empty %}
+          <tr class="fila-vacia">
+            <td colspan="5">
+              Sin movimientos todavía.<br>
+              <a class="boton boton-primario boton-mini" href="{% url 'movimiento_crear' %}?producto={{ producto.pk }}&tipo=ENT">Registrar entrada</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="tarjeta">
+    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Ficha</h2></div>
+    <div class="tarjeta-cuerpo">
+      <ul class="ficha-datos">
+        <li><span class="dato">Referencia</span><span class="valor mono">{{ producto.sku }}</span></li>
+        <li><span class="dato">Categoría</span><span class="valor">{{ producto.categoria.nombre }}</span></li>
+        <li><span class="dato">Unidad</span><span class="valor">{{ producto.get_unidad_display }}</span></li>
+        <li><span class="dato">Precio</span><span class="valor">{{ producto.precio|cop }}</span></li>
+        <li>
+          <span class="dato">Stock actual</span>
+          <span class="valor {% if producto.stock_bajo %}stock-bajo{% endif %}">{{ producto.stock|miles }}</span>
+        </li>
+        <li><span class="dato">Stock mínimo</span><span class="valor">{{ producto.stock_minimo|miles }}</span></li>
+        <li><span class="dato">Valor en inventario</span><span class="valor">{{ producto.valor_inventario|cop }}</span></li>
+        <li><span class="dato">Estado</span><span class="valor">{% if producto.activo %}Activo{% else %}Inactivo{% endif %}</span></li>
+      </ul>
+      {% if producto.stock_bajo and producto.activo %}
+        <p class="separado-arriba"><span class="marca-bajo">Por debajo del mínimo — programar producción</span></p>
+      {% endif %}
+      {% if producto.descripcion %}
+        <p class="texto-suave separado-arriba">{{ producto.descripcion }}</p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

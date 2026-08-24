@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'clientes_lista' %}">Clientes</a></p>
+    <h1>{{ titulo }}</h1>
+  </div>
+</header>
+
+<section class="tarjeta formulario">
+  <div class="tarjeta-cuerpo">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error-general">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.nombre %}
+        {% include 'partes/campo.html' with campo=form.nit %}
+      </div>
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.telefono %}
+        {% include 'partes/campo.html' with campo=form.email %}
+      </div>
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.ciudad %}
+        {% include 'partes/campo.html' with campo=form.direccion %}
+      </div>
+      {% include 'partes/campo.html' with campo=form.notas %}
+
+      <div class="form-acciones">
+        <button type="submit" class="boton boton-primario">Guardar cliente</button>
+        <a class="boton boton-secundario" href="{% if cliente %}{% url 'cliente_detalle' cliente.pk %}{% else %}{% url 'clientes_lista' %}{% endif %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

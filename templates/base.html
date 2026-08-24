@@ -1,0 +1,75 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Tejas Santa Ana{% endblock %} · Tejas Santa Ana S.A.S</title>
+  <link rel="icon" href="{% static 'img/logo.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<div class="aplicacion">
+
+  <nav class="nav-lateral" aria-label="Navegación principal">
+    <a class="nav-marca" href="{% url 'dashboard' %}">
+      <img src="{% static 'img/logo.svg' %}" alt="">
+      <span class="nav-marca-texto">Tejas Santa Ana<small>Inventario y pedidos</small></span>
+    </a>
+
+    <div class="nav-grupos">
+      <a class="nav-item {% if seccion == 'dashboard' %}activo{% endif %}" href="{% url 'dashboard' %}">
+        <span class="rombo"></span>Tablero
+      </a>
+
+      <p class="nav-titulo">Operación</p>
+      <a class="nav-item {% if seccion == 'productos' %}activo{% endif %}" href="{% url 'productos_lista' %}">
+        <span class="rombo"></span>Productos
+      </a>
+      <a class="nav-item {% if seccion == 'movimientos' %}activo{% endif %}" href="{% url 'movimientos_lista' %}">
+        <span class="rombo"></span>Movimientos
+      </a>
+
+      <p class="nav-titulo">Comercial</p>
+      <a class="nav-item {% if seccion == 'pedidos' %}activo{% endif %}" href="{% url 'pedidos_lista' %}">
+        <span class="rombo"></span>Pedidos
+      </a>
+      <a class="nav-item {% if seccion == 'clientes' %}activo{% endif %}" href="{% url 'clientes_lista' %}">
+        <span class="rombo"></span>Clientes
+      </a>
+    </div>
+
+    <div class="nav-pie">
+      <div class="nav-usuario">
+        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="boton-salir">Salir</button>
+        </form>
+      </div>
+      {% if request.user.is_staff %}
+        <a class="nav-admin" href="{% url 'admin:index' %}">Administración</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="contenido">
+    {% if messages %}
+      <div class="mensajes">
+        {% for mensaje in messages %}
+          <div class="mensaje mensaje-{{ mensaje.tags }}">
+            {{ mensaje }}
+            <button type="button" class="cerrar" aria-label="Cerrar aviso">×</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block contenido %}{% endblock %}
+  </main>
+</div>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

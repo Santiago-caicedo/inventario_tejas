@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Clientes{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> Comercial</p>
+    <h1>Clientes</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-primario" href="{% url 'cliente_crear' %}">Nuevo cliente</a>
+  </div>
+</header>
+
+<div class="filtros">
+  <form method="get">
+    <input class="campo buscador" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre, NIT o ciudad…">
+    <button class="boton boton-secundario" type="submit">Buscar</button>
+  </form>
+</div>
+
+<section class="tarjeta">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th>Cliente</th><th>NIT / cédula</th><th>Teléfono</th><th>Ciudad</th><th class="num">Pedidos</th></tr>
+      </thead>
+      <tbody>
+        {% for cliente in pagina %}
+        <tr>
+          <td class="celda-principal"><a href="{% url 'cliente_detalle' cliente.pk %}">{{ cliente.nombre }}</a></td>
+          <td class="mono">{{ cliente.nit|default:'—' }}</td>
+          <td>{{ cliente.telefono|default:'—' }}</td>
+          <td class="texto-suave">{{ cliente.ciudad|default:'—' }}</td>
+          <td class="num">{{ cliente.pedidos.count }}</td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="5">
+            No hay clientes registrados.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'cliente_crear' %}">Crear el primero</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include 'partes/paginacion.html' %}
+{% endblock %}

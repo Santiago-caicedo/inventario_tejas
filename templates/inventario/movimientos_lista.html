@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load moneda %}
+
+{% block titulo %}Movimientos{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> Operación</p>
+    <h1>Movimientos de inventario</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-primario" href="{% url 'movimiento_crear' %}">Registrar movimiento</a>
+  </div>
+</header>
+
+<div class="filtros">
+  <nav class="pestanas" aria-label="Filtrar por tipo">
+    <a href="{% url 'movimientos_lista' %}" class="{% if not tipo %}activa{% endif %}">Todos</a>
+    {% for valor, nombre in tipos %}
+      <a href="{% url 'movimientos_lista' %}?tipo={{ valor }}" class="{% if tipo == valor %}activa{% endif %}">{{ nombre }}s</a>
+    {% endfor %}
+  </nav>
+</div>
+
+<section class="tarjeta">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th class="num">Cantidad</th><th>Pedido</th><th>Nota</th><th>Registró</th></tr>
+      </thead>
+      <tbody>
+        {% for mov in pagina %}
+        <tr>
+          <td class="texto-suave">{{ mov.fecha|date:'d M Y, g:i a' }}</td>
+          <td><span class="chip chip-{{ mov.get_tipo_display|lower }}">{{ mov.get_tipo_display }}</span></td>
+          <td class="celda-principal">
+            <a href="{% url 'producto_detalle' mov.producto.pk %}">{{ mov.producto.nombre }}</a>
+            <span class="sub mono">{{ mov.producto.sku }}</span>
+          </td>
+          <td class="num">{{ mov.efecto|miles }}</td>
+          <td>{% if mov.pedido %}<a class="mono" href="{% url 'pedido_detalle' mov.pedido.pk %}">{{ mov.pedido.numero }}</a>{% else %}<span class="texto-suave">—</span>{% endif %}</td>
+          <td class="texto-suave">{{ mov.nota|default:'—'|truncatechars:36 }}</td>
+          <td class="texto-suave">{{ mov.usuario.username|default:'—' }}</td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="7">
+            Todavía no hay movimientos.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'movimiento_crear' %}">Registrar el primero</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include 'partes/paginacion.html' %}
+{% endblock %}

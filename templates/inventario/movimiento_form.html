@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Registrar movimiento{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="rombo"></span> <a href="{% url 'movimientos_lista' %}">Movimientos</a></p>
+    <h1>Registrar movimiento</h1>
+  </div>
+</header>
+
+<section class="tarjeta formulario" style="max-width:560px;">
+  <div class="tarjeta-cuerpo">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error-general">{{ form.non_field_errors }}</div>{% endif %}
+
+      {% include 'partes/campo.html' with campo=form.producto %}
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.tipo %}
+        {% include 'partes/campo.html' with campo=form.cantidad %}
+      </div>
+      {% include 'partes/campo.html' with campo=form.nota %}
+
+      <p class="ayuda texto-suave">
+        Entrada: producción u otra llegada al patio. Salida: retiro manual sin pedido.
+        Ajuste: corrección de conteo; admite cantidad negativa.
+      </p>
+
+      <div class="form-acciones">
+        <button type="submit" class="boton boton-primario">Registrar</button>
+        <a class="boton boton-secundario" href="{% url 'movimientos_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

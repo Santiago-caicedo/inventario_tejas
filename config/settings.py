@@ -3,16 +3,21 @@ Configuración del proyecto — Tejas Santa Ana S.A.S
 Sistema de gestión de inventario y pedidos.
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# En producción, mover a una variable de entorno.
-SECRET_KEY = 'django-insecure-#5p_m=9@6-96zuk-cpu5v-^@_2-r6y-ec35q0$c=%wupy7&bt3'
+# Carga las variables definidas en el archivo .env (no versionado).
+load_dotenv(BASE_DIR / '.env')
 
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-clave-solo-para-desarrollo')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
+
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
 
 INSTALLED_APPS = [
@@ -58,8 +63,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'db_inventario'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 

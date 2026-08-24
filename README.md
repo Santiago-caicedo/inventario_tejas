@@ -19,13 +19,35 @@ Sistema web de gestión de inventario y pedidos para la planta, construido con D
 
 ## Cómo ejecutarlo
 
-```bash
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-```
+El proyecto usa **PostgreSQL** y lee su configuración de un archivo `.env`
+que no se versiona.
+
+1. Crear la base de datos en PostgreSQL (por ejemplo `db_inventario`).
+2. Copiar la plantilla de variables y completarla con los datos reales:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Instalar dependencias y arrancar:
+
+   ```bash
+   pip install -r requirements.txt
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
 Abrir <http://127.0.0.1:8000> e iniciar sesión.
+
+### Variables del `.env`
+
+| Variable | Para qué sirve |
+|---|---|
+| `SECRET_KEY` | Clave criptográfica de Django |
+| `DEBUG` | `True` en desarrollo, `False` en producción |
+| `ALLOWED_HOSTS` | Dominios permitidos, separados por comas |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Credenciales de PostgreSQL |
+| `DB_HOST`, `DB_PORT` | Dónde escucha PostgreSQL (`localhost`, `5432`) |
 
 **Usuario inicial**: `admin` / `tejas2026` — cámbiala en Administración → Usuarios.
 

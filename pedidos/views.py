@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 from inventario.models import Producto
 from inventario.services import StockInsuficiente
 
-from .forms import ClienteForm, ItemPedidoFormSet, PedidoForm
+from .forms import ClienteForm, EstadoPedidoForm, ItemPedidoFormSet, PedidoForm
 from .models import Cliente, Pedido
 from .services import TransicionInvalida, cambiar_estado, stock_descontado
 
@@ -106,27 +106,57 @@ def pedido_crear(request):
         return redirect('pedido_detalle', pk=pedido.pk)
     return render(request, 'pedidos/pedido_form.html', {
         'seccion': 'pedidos', 'form': form, 'formset': formset,
-        'titulo': 'Nuevo pedido', 'precios': _precios_productos(),
+        'editable': True, 'titulo': 'Nuevo pedido', 'precios': _precios_productos(),
     })
 
 
 @login_required
 def pedido_editar(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
-    if not pedido.editable:
-        messages.error(request, 'Solo se pueden editar pedidos pendientes.')
+    # Los datos y los ítems solo se tocan mientras el pedido está pendiente;
+    # el estado se puede mover siempre que queden transiciones por delante.
+    editable = pedido.editable
+    if not editable and not pedido.FLUJO[pedido.estado]:
+        messages.error(
+            request,
+            f'{pedido.numero} está {pedido.get_estado_display().lower()} y ya no admite cambios.',
+        )
         return redirect('pedido_detalle', pk=pedido.pk)
-    form = PedidoForm(request.POST or None, instance=pedido)
-    formset = ItemPedidoFormSet(request.POST or None, instance=pedido)
-    if request.method == 'POST' and form.is_valid() and formset.is_valid():
-        with transaction.atomic():
-            form.save()
-            formset.save()
-        messages.success(request, f'Pedido {pedido.numero} actualizado.')
-        return redirect('pedido_detalle', pk=pedido.pk)
+
+    form = PedidoForm(request.POST or None, instance=pedido) if editable else None
+    formset = ItemPedidoFormSet(request.POST or None, instance=pedido) if editable else None
+    estado_form = EstadoPedidoForm(request.POST or None, pedido=pedido)
+
+    if request.method == 'POST':
+        datos_ok = not editable or (form.is_valid() and formset.is_valid())
+        if datos_ok and estado_form.is_valid():
+            if editable:
+                with transaction.atomic():
+                    form.save()
+                    formset.save()
+            nuevo_estado = estado_form.cleaned_data['estado']
+            if not nuevo_estado:
+                messages.success(request, f'Pedido {pedido.numero} actualizado.')
+            else:
+                # Después de guardar los ítems, para que el despacho descuente
+                # las cantidades que quedaron.
+                try:
+                    cambiar_estado(pedido, nuevo_estado, request.user)
+                except (StockInsuficiente, TransicionInvalida) as error:
+                    messages.error(request, f'{error} El estado no cambió.')
+                else:
+                    messages.success(
+                        request,
+                        f'{pedido.numero} ahora está {pedido.get_estado_display().lower()}.',
+                    )
+            return redirect('pedido_detalle', pk=pedido.pk)
+
     return render(request, 'pedidos/pedido_form.html', {
         'seccion': 'pedidos', 'form': form, 'formset': formset,
-        'titulo': f'Editar {pedido.numero}', 'pedido': pedido,
+        'estado_form': estado_form, 'editable': editable,
+        'titulo': (f'Editar {pedido.numero}' if editable
+                   else f'Cambiar estado de {pedido.numero}'),
+        'pedido': pedido,
         'precios': _precios_productos(),
     })
 

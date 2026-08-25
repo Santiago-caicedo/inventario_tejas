@@ -785,6 +785,9 @@ table.tabla {
   margin-top: 24px;
 }
 
+.campo-estado { max-width: 380px; }
+.campo-estado .form-grupo { margin-bottom: 0; }
+
 .form-check-linea { display: flex; align-items: center; gap: 10px; }
 .form-check-linea label {
   margin: 0;

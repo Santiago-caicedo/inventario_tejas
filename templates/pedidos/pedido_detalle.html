@@ -12,8 +12,8 @@
   </div>
   <div class="acciones">
     <button type="button" class="boton boton-secundario" data-imprimir>Imprimir</button>
-    {% if pedido.editable %}
-      <a class="boton boton-secundario" href="{% url 'pedido_editar' pedido.pk %}">Editar</a>
+    {% if pedido.editable or acciones %}
+      <a class="boton boton-secundario" href="{% url 'pedido_editar' pedido.pk %}">{% if pedido.editable %}Editar{% else %}Cambiar estado{% endif %}</a>
     {% endif %}
   </div>
 </header>

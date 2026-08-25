@@ -52,3 +52,34 @@ ItemPedidoFormSet = inlineformset_factory(
     validate_min=True,
     can_delete=True,
 )
+
+
+class EstadoPedidoForm(forms.Form):
+    """Cambio de estado desde la pantalla de edición.
+
+    A propósito no es un ModelForm: el estado nunca se guarda directo sobre el
+    pedido, se aplica con `pedidos.services.cambiar_estado` para que el stock
+    se mueva y se respete el flujo. El selector solo ofrece las transiciones
+    válidas desde el estado actual.
+    """
+
+    estado = forms.ChoiceField(
+        label='Cambiar estado',
+        required=False,
+        widget=forms.Select(attrs={'class': 'campo campo-select'}),
+    )
+
+    def __init__(self, *args, pedido, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pedido = pedido
+        nombres = dict(Pedido.Estado.choices)
+        self.fields['estado'].choices = (
+            [('', f'Dejarlo en «{nombres[pedido.estado]}»')]
+            + [(e, nombres[e]) for e in pedido.FLUJO[pedido.estado]]
+        )
+
+    def clean_estado(self):
+        estado = self.cleaned_data['estado']
+        if estado and not self.pedido.puede_pasar_a(estado):
+            raise forms.ValidationError('Ese cambio de estado no está permitido.')
+        return estado

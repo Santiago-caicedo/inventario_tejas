@@ -20,6 +20,7 @@
     </div>
   {% endif %}
 
+  {% if editable %}
   <section class="tarjeta formulario" style="max-width:none;">
     <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Datos del pedido</h2></div>
     <div class="tarjeta-cuerpo">
@@ -77,13 +78,37 @@
       <p class="ayuda texto-suave">El precio se llena solo al elegir el producto; puedes cambiarlo si negociaste otro valor.</p>
     </div>
   </section>
+  {% endif %}
+
+  {% if estado_form %}
+  <section class="tarjeta formulario {% if editable %}separado-arriba{% endif %}" style="max-width:none;">
+    <div class="tarjeta-cabeza">
+      <h2><span class="hilada" aria-hidden="true"></span>Estado</h2>
+      <span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span>
+    </div>
+    <div class="tarjeta-cuerpo">
+      <div class="campo-estado">
+        {% include 'partes/campo.html' with campo=estado_form.estado %}
+        <p class="ayuda">
+          {% if pedido.estado == 'CON' %}Al despacharlo se descuenta el stock del patio.
+          {% elif pedido.estado == 'PEN' %}Confirmarlo lo aparta; el stock se descuenta al despachar.
+          {% else %}Cancelarlo devuelve al patio el stock que ya salió.{% endif %}
+        </p>
+      </div>
+      {% if not editable %}
+        <p class="ayuda separado-arriba">Los datos y los ítems no se pueden cambiar: el pedido ya salió de pendiente.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
 
   <div class="form-acciones">
-    <button type="submit" class="boton boton-primario">Guardar pedido</button>
+    <button type="submit" class="boton boton-primario">{% if editable %}Guardar pedido{% else %}Guardar estado{% endif %}</button>
     <a class="boton boton-secundario" href="{% if pedido %}{% url 'pedido_detalle' pedido.pk %}{% else %}{% url 'pedidos_lista' %}{% endif %}">Cancelar</a>
   </div>
 </form>
 
+{% if editable %}
 <template id="plantilla-item">
   <tr class="fila-item">
     <td>{{ formset.empty_form.producto }}</td>
@@ -97,4 +122,5 @@
 </template>
 
 {{ precios|json_script:'datos-productos' }}
+{% endif %}
 {% endblock %}

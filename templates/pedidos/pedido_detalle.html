@@ -124,24 +124,6 @@
       {% if pedido.notas %}<p>{{ pedido.notas }}</p>{% endif %}
     </div>
 
-    <div class="doc-firmas">
-      <p class="doc-firma">
-        <span class="linea"></span>
-        <span class="doc-rotulo">Elaboró</span>
-        <span class="apunte">{{ pedido.usuario.get_full_name|default:pedido.usuario.username|default:'—' }}</span>
-      </p>
-      <p class="doc-firma">
-        <span class="linea"></span>
-        <span class="doc-rotulo">Despachó</span>
-        <span class="apunte">Nombre y cédula</span>
-      </p>
-      <p class="doc-firma">
-        <span class="linea"></span>
-        <span class="doc-rotulo">Recibí conforme</span>
-        <span class="apunte">Nombre, cédula y fecha</span>
-      </p>
-    </div>
-
     <footer class="doc-pie">
       <span class="aviso">Este documento no es factura de venta. Ampara únicamente la entrega de la mercancía relacionada.</span>
       <span class="mono">{{ pedido.numero }} · Original — cliente</span>

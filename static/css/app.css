@@ -1230,28 +1230,6 @@ table.tabla {
 }
 .doc-observaciones p { font-size: 12px; margin-top: 3px; }
 
-/* ---- Firmas ---- */
-
-.doc-firmas {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
-  margin-top: 40px;
-}
-
-.doc-firma { text-align: center; }
-.doc-firma .linea {
-  display: block;
-  border-top: 1px solid var(--tinta-doc);
-  margin-bottom: 6px;
-}
-.doc-firma .apunte {
-  display: block;
-  margin-top: 3px;
-  font-size: 10px;
-  color: #8A7663;
-}
-
 /* ---- Pie legal ---- */
 
 .doc-pie {
@@ -1260,7 +1238,7 @@ table.tabla {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: auto;
+  margin-top: 22px;
   padding-top: 14px;
   border-top: 1px solid var(--regla-fina);
   font-size: 9.5px;
@@ -1299,7 +1277,6 @@ table.tabla {
   .doc-folio { min-width: 0; width: 100%; }
   .doc-partes { grid-template-columns: 1fr; }
   .doc-partes .doc-campo { border-left: none !important; }
-  .doc-firmas { grid-template-columns: 1fr; gap: 34px; }
 }
 
 /* ============================================================================
@@ -1523,6 +1500,5 @@ table.tabla {
   .hoja a { text-decoration: none; }
   .doc-items thead { display: table-header-group; }
   .doc-items tr { page-break-inside: avoid; }
-  .doc-firmas { page-break-inside: avoid; margin-top: 30px; }
   .doc-pie { page-break-inside: avoid; }
 }

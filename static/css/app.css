@@ -986,6 +986,135 @@ table.tabla {
 }
 
 /* ============================================================================
+   Recibo — la remisión del pedido, pensada para leerse y para imprimirse
+   ========================================================================== */
+
+.recibo {
+  background: var(--lienzo);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-caja);
+  box-shadow: var(--sombra);
+  padding: 32px 32px 20px;
+}
+
+.recibo-cabeza {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  position: relative;
+}
+
+/* El dintel del horno hace de regla del documento */
+.recibo-cabeza::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 9px;
+  color: var(--acento);
+  background:
+    linear-gradient(currentColor 0 0) 0 0   / 100% 3px no-repeat,
+    linear-gradient(currentColor 0 0) 0 6px / 100% 1px no-repeat;
+}
+
+.recibo-logo { height: 80px; width: auto; flex: none; }
+
+.recibo-id { text-align: right; display: grid; gap: 6px; justify-items: end; }
+
+.recibo-tipo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.recibo-numero {
+  font-family: var(--f-mono);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+}
+
+.recibo-partes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--tinta-media);
+}
+
+.recibo-rotulo {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  margin-bottom: 6px;
+}
+
+.recibo-fuerte { color: var(--tinta); font-weight: 600; font-size: 14.5px; }
+.recibo-fuerte a:hover { color: var(--acento); text-decoration: underline; }
+
+.recibo-items { border-top: 1px solid var(--borde); }
+.recibo-items th { padding-left: 0; }
+.recibo-items td:first-child, .recibo-items th:first-child { padding-left: 0; }
+.recibo-items td:last-child, .recibo-items th:last-child { padding-right: 0; }
+.recibo-items tbody tr:hover { background: transparent; }
+.recibo-items tbody tr:last-child td { border-bottom: 1px solid var(--borde); }
+
+.recibo-cierre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+}
+
+.recibo-unidades {
+  font-size: 13px;
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.recibo-cierre .total-pedido {
+  border-top: none;
+  background: transparent;
+  padding: 0;
+  gap: 20px;
+  flex: none;
+}
+
+.recibo-notas {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borde);
+  font-size: 13.5px;
+  color: var(--tinta-media);
+}
+
+.recibo-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+.recibo-pie .mono { font-family: var(--f-mono); letter-spacing: 0; text-transform: none; }
+
+/* ============================================================================
    Inicio de sesión
    ========================================================================== */
 
@@ -1174,9 +1303,24 @@ table.tabla {
 
 @media print {
   .nav-lateral,
+  .salto-contenido,
+  .mensajes,
   .encabezado .acciones,
   .acciones-estado,
-  .paginacion { display: none; }
+  .paginacion,
+  .sin-imprimir { display: none; }
+
   .contenido { margin: 0; max-width: none; padding: 0; }
   .tarjeta { box-shadow: none; }
+  .detalle-columnas { grid-template-columns: 1fr; }
+
+  .encabezado { margin-bottom: 0; }
+  .encabezado .miga, .encabezado h1 { display: none; }
+
+  .recibo {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .recibo-items tbody tr { page-break-inside: avoid; }
 }

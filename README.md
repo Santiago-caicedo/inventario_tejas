@@ -13,9 +13,11 @@ Sistema web de gestión de inventario y pedidos para la planta, construido con D
   con nota, usuario y fecha.
 - **Clientes**: ferreterías, depósitos y constructoras con sus datos de contacto.
 - **Pedidos**: flujo Pendiente → Confirmado → Despachado → Entregado (o Cancelado).
-  Al **confirmar** se descuenta el stock automáticamente; al **cancelar** un pedido
-  confirmado, el stock se devuelve. Si no hay inventario suficiente, el sistema
-  no deja confirmar.
+  Confirmar solo aparta el pedido: el stock **se descuenta al despachar**, que es
+  cuando la mercancía sale del patio. Al **cancelar** un pedido ya despachado el
+  stock se devuelve; si se cancela antes, no hay nada que devolver. Si no hay
+  inventario suficiente, el sistema no deja despachar.
+  Cada pedido tiene una vista de remisión imprimible desde **Ver recibo**.
 
 ## Cómo ejecutarlo
 

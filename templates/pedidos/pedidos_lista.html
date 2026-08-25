@@ -35,6 +35,7 @@
         <tr>
           <th scope="col">Pedido</th><th scope="col">Cliente</th><th scope="col">Creado</th><th scope="col">Entrega</th>
           <th scope="col">Estado</th><th scope="col" class="num">Unidades</th><th scope="col" class="num">Total</th>
+          <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
         </tr>
       </thead>
       <tbody>
@@ -47,10 +48,15 @@
           <td><span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span></td>
           <td class="num">{{ pedido.unidades|miles }}</td>
           <td class="num">{{ pedido.total|cop }}</td>
+          <td class="texto-derecha">
+            <a class="boton boton-secundario boton-mini" href="{% url 'pedido_detalle' pedido.pk %}">
+              Ver recibo<span class="visualmente-oculto"> del pedido {{ pedido.numero }}</span>
+            </a>
+          </td>
         </tr>
         {% empty %}
         <tr class="fila-vacia">
-          <td colspan="7">
+          <td colspan="8">
             No hay pedidos {% if estado %}en este estado{% endif %}.<br>
             <a class="boton boton-primario boton-mini" href="{% url 'pedido_crear' %}">Crear pedido</a>
           </td>

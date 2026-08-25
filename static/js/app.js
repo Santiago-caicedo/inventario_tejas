@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Imprimir el recibo del pedido
+  document.querySelectorAll('[data-imprimir]').forEach(function (boton) {
+    boton.addEventListener('click', function () {
+      window.print();
+    });
+  });
+
   // ----- Formulario de pedido: filas dinámicas de ítems -----
   var tabla = document.getElementById('tabla-items');
   if (!tabla) return;

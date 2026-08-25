@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load moneda %}
 
 {% block titulo %}{{ pedido.numero }}{% endblock %}
@@ -10,7 +11,7 @@
     <h1>{{ pedido.numero }}</h1>
   </div>
   <div class="acciones">
-    <span class="chip chip-{{ pedido.get_estado_display|lower }}" style="align-self:center;">{{ pedido.get_estado_display }}</span>
+    <button type="button" class="boton boton-secundario" data-imprimir>Imprimir</button>
     {% if pedido.editable %}
       <a class="boton boton-secundario" href="{% url 'pedido_editar' pedido.pk %}">Editar</a>
     {% endif %}
@@ -18,12 +19,46 @@
 </header>
 
 <div class="detalle-columnas">
-  <section class="tarjeta">
-    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Ítems del pedido</h2></div>
+
+  <article class="recibo">
+    <header class="recibo-cabeza">
+      <img class="recibo-logo" src="{% static 'img/logo.png' %}" alt="Terracogua Arcillas" width="103" height="80">
+      <div class="recibo-id">
+        <p class="recibo-tipo">Remisión de pedido</p>
+        <p class="recibo-numero">{{ pedido.numero }}</p>
+        <span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span>
+      </div>
+    </header>
+
+    <div class="recibo-partes">
+      <div>
+        <p class="recibo-rotulo">Cliente</p>
+        <p class="recibo-fuerte"><a href="{% url 'cliente_detalle' pedido.cliente.pk %}">{{ pedido.cliente.nombre }}</a></p>
+        {% if pedido.cliente.nit %}<p>NIT {{ pedido.cliente.nit }}</p>{% endif %}
+        {% if pedido.cliente.telefono %}<p>Tel. {{ pedido.cliente.telefono }}</p>{% endif %}
+      </div>
+      <div>
+        <p class="recibo-rotulo">Entrega</p>
+        <p class="recibo-fuerte">{{ pedido.fecha_entrega|date:'d M Y'|default:'Fecha por definir' }}</p>
+        <p>{{ pedido.direccion_entrega|default:pedido.cliente.direccion|default:'Sin dirección registrada' }}</p>
+        {% if pedido.cliente.ciudad %}<p>{{ pedido.cliente.ciudad }}</p>{% endif %}
+      </div>
+      <div>
+        <p class="recibo-rotulo">Emitido</p>
+        <p class="recibo-fuerte">{{ pedido.creado|date:'d M Y' }}</p>
+        <p>Por {{ pedido.usuario.username|default:'—' }}</p>
+      </div>
+    </div>
+
     <div class="tabla-envoltura">
-      <table class="tabla">
+      <table class="tabla recibo-items">
         <thead>
-          <tr><th scope="col">Producto</th><th scope="col" class="num">Cantidad</th><th scope="col" class="num">Precio unitario</th><th scope="col" class="num">Subtotal</th></tr>
+          <tr>
+            <th scope="col">Producto</th>
+            <th scope="col" class="num">Cantidad</th>
+            <th scope="col" class="num">Precio unitario</th>
+            <th scope="col" class="num">Subtotal</th>
+          </tr>
         </thead>
         <tbody>
           {% for item in pedido.items.all %}
@@ -36,44 +71,74 @@
             <td class="num">{{ item.precio|cop }}</td>
             <td class="num">{{ item.subtotal|cop }}</td>
           </tr>
+          {% empty %}
+          <tr class="fila-vacia"><td colspan="4">Este pedido no tiene ítems.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    <div class="total-pedido">
-      <span>Total del pedido</span>
-      <span class="cifra-total">{{ pedido.total|cop }}</span>
-    </div>
-  </section>
 
-  <aside>
-    <div class="tarjeta">
-      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Datos de entrega</h2></div>
-      <div class="tarjeta-cuerpo">
-        <ul class="ficha-datos">
-          <li><span class="dato">Cliente</span><span class="valor"><a href="{% url 'cliente_detalle' pedido.cliente.pk %}">{{ pedido.cliente.nombre }}</a></span></li>
-          <li><span class="dato">Teléfono</span><span class="valor">{{ pedido.cliente.telefono|default:'—' }}</span></li>
-          <li><span class="dato">Entrega</span><span class="valor">{{ pedido.fecha_entrega|date:'d M Y'|default:'Por definir' }}</span></li>
-          <li><span class="dato">Dirección</span><span class="valor">{{ pedido.direccion_entrega|default:pedido.cliente.direccion|default:'—' }}</span></li>
-          <li><span class="dato">Creado por</span><span class="valor">{{ pedido.usuario.username|default:'—' }}</span></li>
-        </ul>
-        {% if pedido.notas %}<p class="texto-suave separado-arriba">{{ pedido.notas }}</p>{% endif %}
+    <div class="recibo-cierre">
+      <p class="recibo-unidades">{{ pedido.unidades|miles }} unidades en {{ pedido.items.count }} referencia{{ pedido.items.count|pluralize:"s" }}</p>
+      <div class="total-pedido">
+        <span>Total del pedido</span>
+        <span class="cifra-total">{{ pedido.total|cop }}</span>
       </div>
     </div>
 
-    {% if acciones %}
+    {% if pedido.notas %}
+      <p class="recibo-notas"><span class="recibo-rotulo">Notas</span>{{ pedido.notas }}</p>
+    {% endif %}
+
+    <footer class="recibo-pie">
+      <span>Terracogua Arcillas · Inventario y pedidos</span>
+      <span class="mono">{{ pedido.numero }}</span>
+    </footer>
+  </article>
+
+  <aside class="sin-imprimir">
+    <div class="tarjeta">
+      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Estado del pedido</h2></div>
+      <div class="tarjeta-cuerpo">
+        <ul class="ficha-datos">
+          <li><span class="dato">Estado actual</span><span class="valor"><span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span></span></li>
+          <li>
+            <span class="dato">Stock</span>
+            <span class="valor">{% if descontado %}Descontado del patio{% else %}Todavía en el patio{% endif %}</span>
+          </li>
+          <li><span class="dato">Última actualización</span><span class="valor">{{ pedido.actualizado|date:'d M Y, g:i a' }}</span></li>
+        </ul>
+
+        {% if acciones %}
+          <div class="acciones-estado separado-arriba">
+            {% for estado, etiqueta, nota in acciones %}
+              <form method="post" action="{% url 'pedido_cambiar_estado' pedido.pk estado %}">
+                {% csrf_token %}
+                <button type="submit" class="boton {% if estado == 'CAN' %}boton-peligro{% elif forloop.first %}boton-primario{% else %}boton-secundario{% endif %}">
+                  {{ etiqueta }}
+                </button>
+                {% if nota %}<p class="nota-accion">{{ nota }}</p>{% endif %}
+              </form>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="ayuda">Este pedido llegó al final del flujo; no admite más cambios de estado.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if pedido.movimientos.exists %}
     <div class="tarjeta separado-arriba">
-      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Avanzar pedido</h2></div>
-      <div class="tarjeta-cuerpo acciones-estado">
-        {% for estado, etiqueta, nota in acciones %}
-          <form method="post" action="{% url 'pedido_cambiar_estado' pedido.pk estado %}">
-            {% csrf_token %}
-            <button type="submit" class="boton {% if estado == 'CAN' %}boton-peligro{% elif forloop.first %}boton-primario{% else %}boton-secundario{% endif %}">
-              {{ etiqueta }}
-            </button>
-            {% if nota %}<p class="nota-accion">{{ nota }}</p>{% endif %}
-          </form>
-        {% endfor %}
+      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Movimientos de este pedido</h2></div>
+      <div class="tarjeta-cuerpo">
+        <ul class="ficha-datos">
+          {% for mov in pedido.movimientos.all %}
+            <li>
+              <span class="dato">{{ mov.fecha|date:'d M Y' }} · <span class="chip chip-{{ mov.get_tipo_display|lower }}">{{ mov.get_tipo_display }}</span></span>
+              <span class="valor mono">{{ mov.efecto|miles }}</span>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
     {% endif %}

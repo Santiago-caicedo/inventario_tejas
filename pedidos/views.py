@@ -11,7 +11,7 @@ from inventario.services import StockInsuficiente
 
 from .forms import ClienteForm, ItemPedidoFormSet, PedidoForm
 from .models import Cliente, Pedido
-from .services import TransicionInvalida, cambiar_estado
+from .services import TransicionInvalida, cambiar_estado, stock_descontado
 
 
 # ----- Clientes -----
@@ -101,7 +101,7 @@ def pedido_crear(request):
         with transaction.atomic():
             form.save()
             formset.save()
-        messages.success(request, f'Pedido {pedido.numero} creado. Confírmalo para descontar el stock.')
+        messages.success(request, f'Pedido {pedido.numero} creado. El stock se descuenta cuando lo despaches.')
         return redirect('pedido_detalle', pk=pedido.pk)
     return render(request, 'pedidos/pedido_form.html', {
         'seccion': 'pedidos', 'form': form, 'formset': formset,
@@ -136,11 +136,21 @@ def pedido_detalle(request, pk):
         Pedido.objects.select_related('cliente', 'usuario').prefetch_related('items__producto'),
         pk=pk,
     )
+    descontado = stock_descontado(pedido)
     acciones = {
-        Pedido.Estado.CONFIRMADO: ('Confirmar pedido', 'La confirmación descuenta el stock.'),
-        Pedido.Estado.DESPACHADO: ('Marcar despachado', ''),
+        Pedido.Estado.CONFIRMADO: (
+            'Confirmar pedido',
+            'Aparta el pedido. El stock se descuenta al despacharlo.',
+        ),
+        Pedido.Estado.DESPACHADO: (
+            'Marcar despachado',
+            '' if descontado else 'Descuenta el stock del patio.',
+        ),
         Pedido.Estado.ENTREGADO: ('Marcar entregado', ''),
-        Pedido.Estado.CANCELADO: ('Cancelar', 'Si ya estaba confirmado, el stock se devuelve.'),
+        Pedido.Estado.CANCELADO: (
+            'Cancelar pedido',
+            'El stock vuelve al patio.' if descontado else 'Todavía no se ha movido stock.',
+        ),
     }
     disponibles = [
         (estado, acciones[estado][0], acciones[estado][1])
@@ -148,6 +158,7 @@ def pedido_detalle(request, pk):
     ]
     return render(request, 'pedidos/pedido_detalle.html', {
         'seccion': 'pedidos', 'pedido': pedido, 'acciones': disponibles,
+        'descontado': descontado,
     })
 
 

@@ -3,6 +3,14 @@
 venv/
 env/
 
+# Entorno virtual creado en la raíz del proyecto (estándar del servidor)
+/bin/
+/lib/
+/lib64/
+/include/
+/share/
+pyvenv.cfg
+
 # Python
 __pycache__/
 *.py[cod]
@@ -28,3 +36,6 @@ Thumbs.db
 
 # Claude Code (config local)
 .claude/settings.local.json
+
+# Documentación interna de infraestructura (no versionar)
+s3.md

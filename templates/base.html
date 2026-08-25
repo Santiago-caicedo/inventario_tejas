@@ -36,6 +36,9 @@
       <a class="nav-item" href="{% url 'productos_lista' %}" {% if seccion == 'productos' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Productos
       </a>
+      <a class="nav-item" href="{% url 'categorias_lista' %}" {% if seccion == 'categorias' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Categorías
+      </a>
       <a class="nav-item" href="{% url 'movimientos_lista' %}" {% if seccion == 'movimientos' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Movimientos
       </a>

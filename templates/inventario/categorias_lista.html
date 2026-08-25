@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Categorías{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Operación</p>
+    <h1>Categorías</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-primario" href="{% url 'categoria_crear' %}">Nueva categoría</a>
+  </div>
+</header>
+
+<section class="tarjeta">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th scope="col">Categoría</th>
+          <th scope="col" class="num">Productos activos</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for categoria in categorias %}
+        <tr>
+          <td class="celda-principal">{{ categoria.nombre }}</td>
+          <td class="num">{{ categoria.total }}</td>
+          <td class="texto-derecha">
+            <a class="ver-todo" href="{% url 'productos_lista' %}?categoria={{ categoria.pk }}">Ver productos</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="3">
+            Todavía no hay categorías. Cada producto necesita una para poder registrarse.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'categoria_crear' %}">Crear la primera</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

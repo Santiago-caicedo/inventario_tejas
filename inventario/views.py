@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import F, Q, Sum
+from django.db.models import Count, F, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
 from pedidos.models import Pedido
@@ -102,14 +102,24 @@ def producto_detalle(request, pk):
 
 
 @login_required
+def categorias_lista(request):
+    categorias = Categoria.objects.annotate(
+        total=Count('productos', filter=Q(productos__activo=True))
+    ).order_by('nombre')
+    return render(request, 'inventario/categorias_lista.html', {
+        'seccion': 'categorias', 'categorias': categorias,
+    })
+
+
+@login_required
 def categoria_crear(request):
     form = CategoriaForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        form.save()
-        messages.success(request, 'Categoría creada.')
-        return redirect('productos_lista')
+        categoria = form.save()
+        messages.success(request, f'Categoría «{categoria.nombre}» creada.')
+        return redirect('categorias_lista')
     return render(request, 'inventario/categoria_form.html', {
-        'seccion': 'productos', 'form': form,
+        'seccion': 'categorias', 'form': form,
     })
 
 

@@ -33,11 +33,21 @@ class ProductoForm(FormBase):
             'nombre': forms.TextInput(attrs={'placeholder': 'Teja colonial No. 4'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['categoria'].empty_label = 'Elige la categoría…'
+
 
 class CategoriaForm(FormBase):
     class Meta:
         model = Categoria
         fields = ['nombre']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'placeholder': 'Ej.: Tejas, Ladrillos, Adoquines…'}),
+        }
+        help_texts = {
+            'nombre': 'Agrupa productos del mismo tipo. Sirve para filtrar la lista de productos.',
+        }
 
 
 class MovimientoForm(FormBase):

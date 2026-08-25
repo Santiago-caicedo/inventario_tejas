@@ -152,3 +152,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+# Datos del emisor que salen impresos en la remisión. Van en el .env porque
+# son del cliente y no del código; las líneas vacías no se imprimen.
+EMPRESA = {
+    'nombre': os.getenv('EMPRESA_NOMBRE', 'Terracogua Arcillas'),
+    'nit': os.getenv('EMPRESA_NIT', ''),
+    'direccion': os.getenv('EMPRESA_DIRECCION', ''),
+    'ciudad': os.getenv('EMPRESA_CIUDAD', ''),
+    'telefono': os.getenv('EMPRESA_TELEFONO', ''),
+    'email': os.getenv('EMPRESA_EMAIL', ''),
+}

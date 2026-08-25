@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -137,6 +138,8 @@ def pedido_detalle(request, pk):
         pk=pk,
     )
     descontado = stock_descontado(pedido)
+    # Renglones en blanco: una remisión impresa siempre lleva la hoja llena.
+    renglones_libres = range(max(0, 6 - pedido.items.count()))
     acciones = {
         Pedido.Estado.CONFIRMADO: (
             'Confirmar pedido',
@@ -158,7 +161,8 @@ def pedido_detalle(request, pk):
     ]
     return render(request, 'pedidos/pedido_detalle.html', {
         'seccion': 'pedidos', 'pedido': pedido, 'acciones': disponibles,
-        'descontado': descontado,
+        'descontado': descontado, 'empresa': settings.EMPRESA,
+        'renglones_libres': renglones_libres,
     })
 
 

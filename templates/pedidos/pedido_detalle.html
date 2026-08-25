@@ -7,7 +7,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a> · {{ pedido.creado|date:'d M Y' }}</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a> · Remisión</p>
     <h1>{{ pedido.numero }}</h1>
   </div>
   <div class="acciones">
@@ -20,79 +20,131 @@
 
 <div class="detalle-columnas">
 
-  <article class="recibo">
-    <header class="recibo-cabeza">
-      <img class="recibo-logo" src="{% static 'img/logo.png' %}" alt="Terracogua Arcillas" width="103" height="80">
-      <div class="recibo-id">
-        <p class="recibo-tipo">Remisión de pedido</p>
-        <p class="recibo-numero">{{ pedido.numero }}</p>
-        <span class="chip chip-{{ pedido.get_estado_display|lower }}">{{ pedido.get_estado_display }}</span>
+  <article class="hoja">
+
+    {% if pedido.estado == 'CAN' %}
+      <p class="doc-sello" aria-hidden="true">ANULADO</p>
+    {% endif %}
+
+    <header class="doc-cabeza">
+      <div class="doc-emisor">
+        <img src="{% static 'img/logo-horizontal.png' %}" alt="{{ empresa.nombre }}" width="154" height="46">
+        <div class="doc-emisor-datos">
+          {% if empresa.nit %}<p class="doc-nit">NIT {{ empresa.nit }}</p>{% endif %}
+          {% if empresa.direccion %}<p>{{ empresa.direccion }}</p>{% endif %}
+          {% if empresa.ciudad %}<p>{{ empresa.ciudad }}</p>{% endif %}
+          {% if empresa.telefono %}<p>Tel. {{ empresa.telefono }}</p>{% endif %}
+          {% if empresa.email %}<p>{{ empresa.email }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="doc-folio">
+        <p class="doc-folio-tipo">Remisión de despacho</p>
+        <p class="doc-folio-numero">{{ pedido.numero }}</p>
+        <p class="doc-folio-fecha">
+          <span class="doc-rotulo">Fecha</span>
+          <span class="valor">{{ pedido.creado|date:'d/m/Y' }}</span>
+        </p>
       </div>
     </header>
 
-    <div class="recibo-partes">
-      <div>
-        <p class="recibo-rotulo">Cliente</p>
-        <p class="recibo-fuerte"><a href="{% url 'cliente_detalle' pedido.cliente.pk %}">{{ pedido.cliente.nombre }}</a></p>
-        {% if pedido.cliente.nit %}<p>NIT {{ pedido.cliente.nit }}</p>{% endif %}
-        {% if pedido.cliente.telefono %}<p>Tel. {{ pedido.cliente.telefono }}</p>{% endif %}
+    <div class="doc-partes">
+      <div class="doc-campo">
+        <span class="doc-rotulo">Señor(es)</span>
+        <span class="valor">{{ pedido.cliente.nombre }}</span>
       </div>
-      <div>
-        <p class="recibo-rotulo">Entrega</p>
-        <p class="recibo-fuerte">{{ pedido.fecha_entrega|date:'d M Y'|default:'Fecha por definir' }}</p>
-        <p>{{ pedido.direccion_entrega|default:pedido.cliente.direccion|default:'Sin dirección registrada' }}</p>
-        {% if pedido.cliente.ciudad %}<p>{{ pedido.cliente.ciudad }}</p>{% endif %}
+      <div class="doc-campo">
+        <span class="doc-rotulo">NIT / C.C.</span>
+        <span class="valor mono">{{ pedido.cliente.nit|default:'—' }}</span>
       </div>
-      <div>
-        <p class="recibo-rotulo">Emitido</p>
-        <p class="recibo-fuerte">{{ pedido.creado|date:'d M Y' }}</p>
-        <p>Por {{ pedido.usuario.username|default:'—' }}</p>
+      <div class="doc-campo">
+        <span class="doc-rotulo">Dirección de entrega</span>
+        <span class="valor suelto">{{ pedido.direccion_entrega|default:pedido.cliente.direccion|default:'—' }}</span>
       </div>
-    </div>
-
-    <div class="tabla-envoltura">
-      <table class="tabla recibo-items">
-        <thead>
-          <tr>
-            <th scope="col">Producto</th>
-            <th scope="col" class="num">Cantidad</th>
-            <th scope="col" class="num">Precio unitario</th>
-            <th scope="col" class="num">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in pedido.items.all %}
-          <tr>
-            <td class="celda-principal">
-              <a href="{% url 'producto_detalle' item.producto.pk %}">{{ item.producto.nombre }}</a>
-              <span class="sub mono">{{ item.producto.sku }}</span>
-            </td>
-            <td class="num">{{ item.cantidad|miles }}</td>
-            <td class="num">{{ item.precio|cop }}</td>
-            <td class="num">{{ item.subtotal|cop }}</td>
-          </tr>
-          {% empty %}
-          <tr class="fila-vacia"><td colspan="4">Este pedido no tiene ítems.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="recibo-cierre">
-      <p class="recibo-unidades">{{ pedido.unidades|miles }} unidades en {{ pedido.items.count }} referencia{{ pedido.items.count|pluralize:"s" }}</p>
-      <div class="total-pedido">
-        <span>Total del pedido</span>
-        <span class="cifra-total">{{ pedido.total|cop }}</span>
+      <div class="doc-campo">
+        <span class="doc-rotulo">Ciudad</span>
+        <span class="valor suelto">{{ pedido.cliente.ciudad|default:'—' }}</span>
+      </div>
+      <div class="doc-campo">
+        <span class="doc-rotulo">Teléfono</span>
+        <span class="valor mono">{{ pedido.cliente.telefono|default:'—' }}</span>
+      </div>
+      <div class="doc-campo">
+        <span class="doc-rotulo">Fecha de entrega</span>
+        <span class="valor">{{ pedido.fecha_entrega|date:'d/m/Y'|default:'Por definir' }}</span>
       </div>
     </div>
 
-    {% if pedido.notas %}
-      <p class="recibo-notas"><span class="recibo-rotulo">Notas</span>{{ pedido.notas }}</p>
-    {% endif %}
+    <table class="doc-items">
+      <thead>
+        <tr>
+          <th scope="col" class="c-cant">Cant.</th>
+          <th scope="col" class="c-unidad">Unidad</th>
+          <th scope="col">Descripción</th>
+          <th scope="col" class="c-vunit">Vr. unitario</th>
+          <th scope="col" class="c-total">Vr. total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in pedido.items.all %}
+        <tr>
+          <td class="c-cant cifra">{{ item.cantidad|miles }}</td>
+          <td class="c-unidad">{{ item.producto.get_unidad_display }}</td>
+          <td>
+            <span class="articulo">{{ item.producto.nombre }}</span>
+            <span class="referencia">{{ item.producto.sku }}</span>
+          </td>
+          <td class="c-vunit cifra">{{ item.precio|cop }}</td>
+          <td class="c-total cifra">{{ item.subtotal|cop }}</td>
+        </tr>
+        {% endfor %}
+        {% for _ in renglones_libres %}
+        <tr class="renglon"><td></td><td></td><td></td><td></td><td></td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">Unidades despachadas</td>
+          <td class="c-total cifra">{{ pedido.unidades|miles }}</td>
+        </tr>
+        <tr class="fila-total">
+          <td colspan="4">Total</td>
+          <td class="c-total cifra">{{ pedido.total|cop }}</td>
+        </tr>
+      </tfoot>
+    </table>
 
-    <footer class="recibo-pie">
-      <span>Terracogua Arcillas · Inventario y pedidos</span>
-      <span class="mono">{{ pedido.numero }}</span>
+    <p class="doc-letras">
+      <span class="doc-rotulo">Son</span>
+      <span class="monto">{{ pedido.total|en_letras }}</span>
+    </p>
+
+    <div class="doc-observaciones">
+      <span class="doc-rotulo">Observaciones</span>
+      {% if pedido.notas %}<p>{{ pedido.notas }}</p>{% endif %}
+    </div>
+
+    <div class="doc-firmas">
+      <p class="doc-firma">
+        <span class="linea"></span>
+        <span class="doc-rotulo">Elaboró</span>
+        <span class="apunte">{{ pedido.usuario.get_full_name|default:pedido.usuario.username|default:'—' }}</span>
+      </p>
+      <p class="doc-firma">
+        <span class="linea"></span>
+        <span class="doc-rotulo">Despachó</span>
+        <span class="apunte">Nombre y cédula</span>
+      </p>
+      <p class="doc-firma">
+        <span class="linea"></span>
+        <span class="doc-rotulo">Recibí conforme</span>
+        <span class="apunte">Nombre, cédula y fecha</span>
+      </p>
+    </div>
+
+    <footer class="doc-pie">
+      <span class="aviso">Este documento no es factura de venta. Ampara únicamente la entrega de la mercancía relacionada.</span>
+      <span class="mono">{{ pedido.numero }} · Original — cliente</span>
     </footer>
   </article>
 

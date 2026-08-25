@@ -986,133 +986,320 @@ table.tabla {
 }
 
 /* ============================================================================
-   Recibo — la remisión del pedido, pensada para leerse y para imprimirse
+   Remisión — el documento que viaja en el camión y alguien firma al recibir.
+   Modelada sobre el talonario preimpreso: marco, consecutivo en caja, rejilla
+   con separadores, banda del total en letras y líneas de firma.
    ========================================================================== */
 
-.recibo {
-  background: var(--lienzo);
-  border: 1px solid var(--borde);
-  border-radius: var(--r-caja);
-  box-shadow: var(--sombra);
-  padding: 32px 32px 20px;
+.hoja {
+  --tinta-doc: #241810;
+  --regla: #C8BAA9;
+  --regla-fina: #E0D5C7;
+  background: #FFF;
+  color: var(--tinta-doc);
+  width: 100%;
+  max-width: 820px;          /* carta a 96 ppp */
+  margin-inline: auto;
+  border: 1px solid var(--regla);
+  box-shadow: var(--sombra-alta);
+  padding: 34px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-.recibo-cabeza {
+/* En oscuro el documento sigue siendo papel: es una hoja, no una superficie */
+@media (prefers-color-scheme: dark) {
+  .hoja { box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
+}
+
+.hoja a { color: inherit; }
+.hoja a:hover { color: var(--barro); }
+
+/* ---- Rótulos de campo, como en los formularios preimpresos ---- */
+.doc-rotulo {
+  display: block;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8A7663;
+}
+
+/* ---- Cabecera: emisor a la izquierda, consecutivo en caja a la derecha ---- */
+
+.doc-cabeza {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 24px;
+  gap: 28px;
+  padding-bottom: 18px;
+}
+
+.doc-emisor { min-width: 0; max-width: 340px; }
+
+/* El lockup es el membrete: no se repite la razón social al lado */
+.doc-emisor img {
+  display: block;
+  height: 46px;
+  width: auto;
+  margin-bottom: 11px;
+}
+
+.doc-emisor-datos p { font-size: 11.5px; color: #5B4A3B; line-height: 1.55; }
+.doc-emisor-datos .doc-nit { font-family: var(--f-mono); font-size: 11px; }
+
+/* La caja del consecutivo, con el dintel del horno arriba */
+.doc-folio {
+  flex: none;
+  min-width: 218px;
+  border: 1.5px solid var(--tinta-doc);
+  padding: 14px 18px 14px;
+  text-align: center;
   position: relative;
 }
 
-/* El dintel del horno hace de regla del documento */
-.recibo-cabeza::after {
+.doc-folio::before {
   content: "";
   position: absolute;
-  inset: auto 0 0 0;
-  height: 9px;
-  color: var(--acento);
+  inset: 4px 6px auto 6px;
+  height: 7px;
+  color: var(--barro);
   background:
     linear-gradient(currentColor 0 0) 0 0   / 100% 3px no-repeat,
-    linear-gradient(currentColor 0 0) 0 6px / 100% 1px no-repeat;
+    linear-gradient(currentColor 0 0) 0 5px / 100% 1px no-repeat;
 }
 
-.recibo-logo { height: 80px; width: auto; flex: none; }
-
-.recibo-id { text-align: right; display: grid; gap: 6px; justify-items: end; }
-
-.recibo-tipo {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .16em;
+.doc-folio-tipo {
+  margin-top: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--tinta-suave);
 }
 
-.recibo-numero {
+.doc-folio-numero {
   font-family: var(--f-mono);
-  font-size: 24px;
+  font-size: 27px;
   font-weight: 600;
   letter-spacing: -.02em;
-  line-height: 1.1;
+  line-height: 1.15;
+  color: var(--barro);
 }
 
-.recibo-partes {
+.doc-folio-fecha {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  border-top: 1px solid var(--regla-fina);
+  margin-top: 8px;
+  padding-top: 7px;
+  font-size: 11px;
+}
+.doc-folio-fecha .valor { font-family: var(--f-mono); font-weight: 600; }
+
+/* ---- Bloque del destinatario, con líneas de campo ---- */
+
+.doc-partes {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  border: 1px solid var(--regla);
+  border-bottom: none;
+}
+
+.doc-campo {
+  padding: 8px 12px 9px;
+  border-bottom: 1px solid var(--regla-fina);
+  min-width: 0;
+}
+.doc-campo + .doc-campo { border-left: 1px solid var(--regla-fina); }
+.doc-partes .doc-campo:nth-child(2n) { border-left: 1px solid var(--regla-fina); }
+
+.doc-campo .valor {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+.doc-campo .valor.suelto { font-weight: 400; }
+.doc-campo .valor.mono { font-family: var(--f-mono); font-size: 12px; }
+.doc-campo .vacio { color: #A5937F; font-weight: 400; }
+
+/* ---- Rejilla de ítems ---- */
+
+.doc-items {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--regla);
+  font-size: 12.5px;
+}
+
+.doc-items th {
+  background: #F4EDE4;
+  border: 1px solid var(--regla-fina);
+  border-top-color: var(--regla);
+  padding: 7px 10px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #6E5B49;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.doc-items td {
+  border: 1px solid var(--regla-fina);
+  padding: 9px 10px;
+  vertical-align: top;
+}
+
+.doc-items .c-cant   { width: 68px;  text-align: right; }
+.doc-items .c-unidad { width: 116px; }
+.doc-items .c-vunit  { width: 120px; text-align: right; }
+.doc-items .c-total  { width: 130px; text-align: right; }
+
+.doc-items .cifra {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.doc-items .articulo { font-weight: 600; }
+.doc-items .referencia {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: #8A7663;
+  margin-top: 2px;
+}
+
+/* Renglones en blanco: el talonario siempre trae la hoja llena */
+.doc-items .renglon td { height: 30px; }
+
+.doc-items tfoot td {
+  border: 1px solid var(--regla-fina);
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: right;
+}
+.doc-items tfoot .cifra {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.doc-items tfoot .fila-total td {
+  border-top: 1.5px solid var(--tinta-doc);
+  background: #F4EDE4;
+}
+.doc-items tfoot .fila-total .cifra { font-size: 17px; font-weight: 600; }
+
+/* ---- Banda del total en letras ---- */
+
+.doc-letras {
+  border: 1px solid var(--regla);
+  border-top: none;
+  padding: 9px 12px 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.doc-letras .doc-rotulo { flex: none; }
+.doc-letras .monto {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1.4;
+}
+
+/* ---- Observaciones ---- */
+
+.doc-observaciones {
+  border: 1px solid var(--regla);
+  border-top: none;
+  padding: 9px 12px 12px;
+  min-height: 54px;
+}
+.doc-observaciones p { font-size: 12px; margin-top: 3px; }
+
+/* ---- Firmas ---- */
+
+.doc-firmas {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  padding: 24px 0;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--tinta-media);
+  gap: 26px;
+  margin-top: 40px;
 }
 
-.recibo-rotulo {
+.doc-firma { text-align: center; }
+.doc-firma .linea {
   display: block;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--tinta-suave);
+  border-top: 1px solid var(--tinta-doc);
   margin-bottom: 6px;
 }
-
-.recibo-fuerte { color: var(--tinta); font-weight: 600; font-size: 14.5px; }
-.recibo-fuerte a:hover { color: var(--acento); text-decoration: underline; }
-
-.recibo-items { border-top: 1px solid var(--borde); }
-.recibo-items th { padding-left: 0; }
-.recibo-items td:first-child, .recibo-items th:first-child { padding-left: 0; }
-.recibo-items td:last-child, .recibo-items th:last-child { padding-right: 0; }
-.recibo-items tbody tr:hover { background: transparent; }
-.recibo-items tbody tr:last-child td { border-bottom: 1px solid var(--borde); }
-
-.recibo-cierre {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding-top: 16px;
+.doc-firma .apunte {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: #8A7663;
 }
 
-.recibo-unidades {
-  font-size: 13px;
-  color: var(--tinta-suave);
-  font-variant-numeric: tabular-nums;
-}
+/* ---- Pie legal ---- */
 
-.recibo-cierre .total-pedido {
-  border-top: none;
-  background: transparent;
-  padding: 0;
-  gap: 20px;
-  flex: none;
-}
-
-.recibo-notas {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--borde);
-  font-size: 13.5px;
-  color: var(--tinta-media);
-}
-
-.recibo-pie {
+.doc-pie {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 24px;
+  flex-wrap: wrap;
+  margin-top: auto;
   padding-top: 14px;
-  border-top: 1px solid var(--borde);
-  font-size: 11px;
-  letter-spacing: .1em;
+  border-top: 1px solid var(--regla-fina);
+  font-size: 9.5px;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--tinta-suave);
+  color: #8A7663;
 }
-.recibo-pie .mono { font-family: var(--f-mono); letter-spacing: 0; text-transform: none; }
+.doc-pie .mono { font-family: var(--f-mono); letter-spacing: 0; }
+.doc-pie .aviso { text-transform: none; letter-spacing: .02em; font-size: 10.5px; }
+
+/* Sello de anulado, superpuesto como en el documento físico */
+.hoja { position: relative; }
+
+.doc-sello {
+  position: absolute;
+  top: 300px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-14deg);
+  border: 4px solid var(--alarma);
+  border-radius: 6px;
+  padding: 8px 26px;
+  font-family: var(--f-titulo);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--alarma);
+  opacity: .32;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .hoja { padding: 22px 18px 20px; }
+  .doc-sello { font-size: 28px; top: 340px; }
+  .doc-cabeza { flex-direction: column; gap: 18px; }
+  .doc-folio { min-width: 0; width: 100%; }
+  .doc-partes { grid-template-columns: 1fr; }
+  .doc-partes .doc-campo { border-left: none !important; }
+  .doc-firmas { grid-template-columns: 1fr; gap: 34px; }
+}
 
 /* ============================================================================
    Inicio de sesión
@@ -1301,26 +1488,40 @@ table.tabla {
   .filtros .buscador { min-width: 0; flex: 1; }
 }
 
+@page {
+  size: letter;
+  margin: 13mm 12mm;
+}
+
 @media print {
   .nav-lateral,
   .salto-contenido,
   .mensajes,
-  .encabezado .acciones,
+  .encabezado,
   .acciones-estado,
   .paginacion,
-  .sin-imprimir { display: none; }
+  .sin-imprimir { display: none !important; }
 
+  body { background: #FFF; font-size: 12px; }
   .contenido { margin: 0; max-width: none; padding: 0; }
+  .detalle-columnas { display: block; }
   .tarjeta { box-shadow: none; }
-  .detalle-columnas { grid-template-columns: 1fr; }
 
-  .encabezado { margin-bottom: 0; }
-  .encabezado .miga, .encabezado h1 { display: none; }
-
-  .recibo {
+  /* La hoja ocupa el papel: sin marco propio ni sombra, el borde lo pone la impresora */
+  .hoja {
+    max-width: none;
     border: none;
     box-shadow: none;
     padding: 0;
+    min-height: 0;
+    font-size: 11.5px;
+    color: #000;
+    --regla: #000;
+    --regla-fina: #767676;
   }
-  .recibo-items tbody tr { page-break-inside: avoid; }
+  .hoja a { text-decoration: none; }
+  .doc-items thead { display: table-header-group; }
+  .doc-items tr { page-break-inside: avoid; }
+  .doc-firmas { page-break-inside: avoid; margin-top: 30px; }
+  .doc-pie { page-break-inside: avoid; }
 }

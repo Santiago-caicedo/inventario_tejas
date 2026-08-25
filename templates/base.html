@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}{% load estaticos %}<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% estatico 'css/app.css' %}">
 </head>
 <body>
 <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
@@ -84,6 +84,6 @@
     {% block contenido %}{% endblock %}
   </main>
 </div>
-<script src="{% static 'js/app.js' %}"></script>
+<script src="{% estatico 'js/app.js' %}"></script>
 </body>
 </html>

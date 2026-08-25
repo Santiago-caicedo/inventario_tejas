@@ -1157,10 +1157,11 @@ table.tabla {
   vertical-align: top;
 }
 
-.doc-items .c-cant   { width: 68px;  text-align: right; }
-.doc-items .c-unidad { width: 116px; }
-.doc-items .c-vunit  { width: 120px; text-align: right; }
-.doc-items .c-total  { width: 130px; text-align: right; }
+.doc-items .c-cant   { width: 58px;  text-align: right; }
+.doc-items .c-unidad { width: 98px; }
+.doc-items .c-vunit  { width: 104px; text-align: right; }
+.doc-items .c-total  { width: 116px; text-align: right; }
+.doc-items .articulo { overflow-wrap: break-word; }
 
 .doc-items .cifra {
   font-family: var(--f-mono);

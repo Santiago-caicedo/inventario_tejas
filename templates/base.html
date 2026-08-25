@@ -3,61 +3,72 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Tejas Santa Ana{% endblock %} · Tejas Santa Ana S.A.S</title>
-  <link rel="icon" href="{% static 'img/logo.svg' %}" type="image/svg+xml">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#2A1D14">
+  <title>{% block titulo %}Tablero{% endblock %} · Terracogua Arcillas</title>
+
+  <link rel="icon" href="{% static 'img/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon-180.png' %}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
+<a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+
 <div class="aplicacion">
 
   <nav class="nav-lateral" aria-label="Navegación principal">
     <a class="nav-marca" href="{% url 'dashboard' %}">
-      <img src="{% static 'img/logo.svg' %}" alt="">
-      <span class="nav-marca-texto">Tejas Santa Ana<small>Inventario y pedidos</small></span>
+      <img class="marca-vertical" src="{% static 'img/logo-claro.png' %}" alt="Terracogua Arcillas" width="124" height="96">
+      <img class="marca-horizontal" src="{% static 'img/logo-horizontal-claro.png' %}" alt="Terracogua Arcillas" width="107" height="32">
+      <span class="nav-marca-rotulo">Inventario y pedidos</span>
     </a>
 
     <div class="nav-grupos">
-      <a class="nav-item {% if seccion == 'dashboard' %}activo{% endif %}" href="{% url 'dashboard' %}">
-        <span class="rombo"></span>Tablero
+      <a class="nav-item" href="{% url 'dashboard' %}" {% if seccion == 'dashboard' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Tablero
       </a>
 
       <p class="nav-titulo">Operación</p>
-      <a class="nav-item {% if seccion == 'productos' %}activo{% endif %}" href="{% url 'productos_lista' %}">
-        <span class="rombo"></span>Productos
+      <a class="nav-item" href="{% url 'productos_lista' %}" {% if seccion == 'productos' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Productos
       </a>
-      <a class="nav-item {% if seccion == 'movimientos' %}activo{% endif %}" href="{% url 'movimientos_lista' %}">
-        <span class="rombo"></span>Movimientos
+      <a class="nav-item" href="{% url 'movimientos_lista' %}" {% if seccion == 'movimientos' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Movimientos
       </a>
 
       <p class="nav-titulo">Comercial</p>
-      <a class="nav-item {% if seccion == 'pedidos' %}activo{% endif %}" href="{% url 'pedidos_lista' %}">
-        <span class="rombo"></span>Pedidos
+      <a class="nav-item" href="{% url 'pedidos_lista' %}" {% if seccion == 'pedidos' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Pedidos
       </a>
-      <a class="nav-item {% if seccion == 'clientes' %}activo{% endif %}" href="{% url 'clientes_lista' %}">
-        <span class="rombo"></span>Clientes
+      <a class="nav-item" href="{% url 'clientes_lista' %}" {% if seccion == 'clientes' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Clientes
       </a>
     </div>
 
     <div class="nav-pie">
       <div class="nav-usuario">
-        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+        <span class="nav-usuario-datos">
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span class="nav-usuario-rol">{% if request.user.is_staff %}Administrador{% else %}Operación{% endif %}</span>
+        </span>
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
           <button type="submit" class="boton-salir">Salir</button>
         </form>
       </div>
       {% if request.user.is_staff %}
-        <a class="nav-admin" href="{% url 'admin:index' %}">Administración</a>
+        <a class="nav-admin" href="{% url 'admin:index' %}">Administración del sistema</a>
       {% endif %}
     </div>
   </nav>
 
-  <main class="contenido">
+  <main class="contenido" id="contenido">
     {% if messages %}
-      <div class="mensajes">
+      <div class="mensajes" role="status" aria-live="polite">
         {% for mensaje in messages %}
           <div class="mensaje mensaje-{{ mensaje.tags }}">
             {{ mensaje }}

@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> <a href="{% url 'clientes_lista' %}">Clientes</a></p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'clientes_lista' %}">Clientes</a></p>
     <h1>{{ cliente.nombre }}</h1>
   </div>
   <div class="acciones">
@@ -17,11 +17,11 @@
 
 <div class="detalle-columnas">
   <section class="tarjeta">
-    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Pedidos del cliente</h2></div>
+    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Pedidos del cliente</h2></div>
     <div class="tabla-envoltura">
       <table class="tabla">
         <thead>
-          <tr><th>Pedido</th><th>Fecha</th><th>Estado</th><th class="num">Unidades</th><th class="num">Total</th></tr>
+          <tr><th scope="col">Pedido</th><th scope="col">Fecha</th><th scope="col">Estado</th><th scope="col" class="num">Unidades</th><th scope="col" class="num">Total</th></tr>
         </thead>
         <tbody>
           {% for pedido in pedidos %}
@@ -41,7 +41,7 @@
   </section>
 
   <aside class="tarjeta">
-    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Datos de contacto</h2></div>
+    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Datos de contacto</h2></div>
     <div class="tarjeta-cuerpo">
       <ul class="ficha-datos">
         <li><span class="dato">NIT / cédula</span><span class="valor mono">{{ cliente.nit|default:'—' }}</span></li>

@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a> · {{ pedido.creado|date:'d M Y' }}</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a> · {{ pedido.creado|date:'d M Y' }}</p>
     <h1>{{ pedido.numero }}</h1>
   </div>
   <div class="acciones">
@@ -19,11 +19,11 @@
 
 <div class="detalle-columnas">
   <section class="tarjeta">
-    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Ítems del pedido</h2></div>
+    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Ítems del pedido</h2></div>
     <div class="tabla-envoltura">
       <table class="tabla">
         <thead>
-          <tr><th>Producto</th><th class="num">Cantidad</th><th class="num">Precio unitario</th><th class="num">Subtotal</th></tr>
+          <tr><th scope="col">Producto</th><th scope="col" class="num">Cantidad</th><th scope="col" class="num">Precio unitario</th><th scope="col" class="num">Subtotal</th></tr>
         </thead>
         <tbody>
           {% for item in pedido.items.all %}
@@ -48,7 +48,7 @@
 
   <aside>
     <div class="tarjeta">
-      <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Datos de entrega</h2></div>
+      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Datos de entrega</h2></div>
       <div class="tarjeta-cuerpo">
         <ul class="ficha-datos">
           <li><span class="dato">Cliente</span><span class="valor"><a href="{% url 'cliente_detalle' pedido.cliente.pk %}">{{ pedido.cliente.nombre }}</a></span></li>
@@ -63,7 +63,7 @@
 
     {% if acciones %}
     <div class="tarjeta separado-arriba">
-      <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Avanzar pedido</h2></div>
+      <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Avanzar pedido</h2></div>
       <div class="tarjeta-cuerpo acciones-estado">
         {% for estado, etiqueta, nota in acciones %}
           <form method="post" action="{% url 'pedido_cambiar_estado' pedido.pk estado %}">

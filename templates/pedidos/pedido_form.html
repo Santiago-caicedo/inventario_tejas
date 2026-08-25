@@ -5,7 +5,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a></p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'pedidos_lista' %}">Pedidos</a></p>
     <h1>{{ titulo }}</h1>
   </div>
 </header>
@@ -21,7 +21,7 @@
   {% endif %}
 
   <section class="tarjeta formulario" style="max-width:none;">
-    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Datos del pedido</h2></div>
+    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Datos del pedido</h2></div>
     <div class="tarjeta-cuerpo">
       <div class="form-fila">
         {% include 'partes/campo.html' with campo=form.cliente %}
@@ -34,7 +34,7 @@
 
   <section class="tarjeta separado-arriba">
     <div class="tarjeta-cabeza">
-      <h2><span class="rombo"></span>Ítems</h2>
+      <h2><span class="hilada" aria-hidden="true"></span>Ítems</h2>
       <button type="button" id="agregar-item" class="boton boton-secundario boton-mini">Agregar ítem</button>
     </div>
     <div class="tarjeta-cuerpo">
@@ -43,7 +43,7 @@
         <table class="items-tabla" id="tabla-items">
           <thead>
             <tr>
-              <th>Producto</th>
+              <th scope="col">Producto</th>
               <th class="col-cantidad">Cantidad</th>
               <th class="col-precio">Precio unitario</th>
               <th class="col-quitar"><span class="visualmente-oculto"></span></th>

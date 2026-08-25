@@ -5,7 +5,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> Comercial</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Comercial</p>
     <h1>Clientes</h1>
   </div>
   <div class="acciones">
@@ -24,7 +24,7 @@
   <div class="tabla-envoltura">
     <table class="tabla">
       <thead>
-        <tr><th>Cliente</th><th>NIT / cédula</th><th>Teléfono</th><th>Ciudad</th><th class="num">Pedidos</th></tr>
+        <tr><th scope="col">Cliente</th><th scope="col">NIT / cédula</th><th scope="col">Teléfono</th><th scope="col">Ciudad</th><th scope="col" class="num">Pedidos</th></tr>
       </thead>
       <tbody>
         {% for cliente in pagina %}

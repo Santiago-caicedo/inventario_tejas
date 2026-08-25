@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> Operación</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Operación</p>
     <h1>Productos</h1>
   </div>
   <div class="acciones">
@@ -17,9 +17,9 @@
 
 <div class="filtros">
   <nav class="pestanas" aria-label="Filtrar productos">
-    <a href="{% url 'productos_lista' %}" class="{% if not filtro %}activa{% endif %}">Activos</a>
-    <a href="{% url 'productos_lista' %}?filtro=bajo" class="{% if filtro == 'bajo' %}activa{% endif %}">Stock bajo</a>
-    <a href="{% url 'productos_lista' %}?filtro=inactivos" class="{% if filtro == 'inactivos' %}activa{% endif %}">Inactivos</a>
+    <a href="{% url 'productos_lista' %}" {% if not filtro %}aria-current="page"{% endif %}>Activos</a>
+    <a href="{% url 'productos_lista' %}?filtro=bajo" {% if filtro == 'bajo' %}aria-current="page"{% endif %}>Stock bajo</a>
+    <a href="{% url 'productos_lista' %}?filtro=inactivos" {% if filtro == 'inactivos' %}aria-current="page"{% endif %}>Inactivos</a>
   </nav>
   <form method="get">
     {% if filtro %}<input type="hidden" name="filtro" value="{{ filtro }}">{% endif %}
@@ -39,8 +39,8 @@
     <table class="tabla">
       <thead>
         <tr>
-          <th>Referencia</th><th>Producto</th><th>Categoría</th><th>Unidad</th>
-          <th class="num">Precio</th><th class="num">Stock</th><th class="num">Mínimo</th><th></th>
+          <th scope="col">Referencia</th><th scope="col">Producto</th><th scope="col">Categoría</th><th scope="col">Unidad</th>
+          <th scope="col" class="num">Precio</th><th scope="col" class="num">Stock</th><th scope="col" class="num">Mínimo</th><th scope="col"></th>
         </tr>
       </thead>
       <tbody>

@@ -1,4 +1,4 @@
-# Tejas Santa Ana S.A.S — Inventario y pedidos
+# Terracogua Arcillas — Inventario y pedidos
 
 Sistema web de gestión de inventario y pedidos para la planta, construido con Django.
 

@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> Operación</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Operación</p>
     <h1>Movimientos de inventario</h1>
   </div>
   <div class="acciones">
@@ -16,9 +16,9 @@
 
 <div class="filtros">
   <nav class="pestanas" aria-label="Filtrar por tipo">
-    <a href="{% url 'movimientos_lista' %}" class="{% if not tipo %}activa{% endif %}">Todos</a>
+    <a href="{% url 'movimientos_lista' %}" {% if not tipo %}aria-current="page"{% endif %}>Todos</a>
     {% for valor, nombre in tipos %}
-      <a href="{% url 'movimientos_lista' %}?tipo={{ valor }}" class="{% if tipo == valor %}activa{% endif %}">{{ nombre }}s</a>
+      <a href="{% url 'movimientos_lista' %}?tipo={{ valor }}" {% if tipo == valor %}aria-current="page"{% endif %}>{{ nombre }}s</a>
     {% endfor %}
   </nav>
 </div>
@@ -27,7 +27,7 @@
   <div class="tabla-envoltura">
     <table class="tabla">
       <thead>
-        <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th class="num">Cantidad</th><th>Pedido</th><th>Nota</th><th>Registró</th></tr>
+        <tr><th scope="col">Fecha</th><th scope="col">Tipo</th><th scope="col">Producto</th><th scope="col" class="num">Cantidad</th><th scope="col">Pedido</th><th scope="col">Nota</th><th scope="col">Registró</th></tr>
       </thead>
       <tbody>
         {% for mov in pagina %}

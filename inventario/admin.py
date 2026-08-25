@@ -2,8 +2,8 @@ from django.contrib import admin
 
 from .models import Categoria, Movimiento, Producto
 
-admin.site.site_header = 'Tejas Santa Ana S.A.S'
-admin.site.site_title = 'Tejas Santa Ana'
+admin.site.site_header = 'Terracogua Arcillas'
+admin.site.site_title = 'Terracogua'
 admin.site.index_title = 'Administración'
 
 

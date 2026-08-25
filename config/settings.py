@@ -1,5 +1,5 @@
 """
-Configuración del proyecto — Tejas Santa Ana S.A.S
+Configuración del proyecto — Terracogua Arcillas
 Sistema de gestión de inventario y pedidos.
 """
 

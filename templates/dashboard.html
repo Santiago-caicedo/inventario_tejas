@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> Tejas Santa Ana S.A.S</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Estado al {% now "j \d\e F, Y" %}</p>
     <h1>Tablero de planta</h1>
   </div>
   <div class="acciones">
@@ -17,22 +17,22 @@
 
 <section class="kpis" aria-label="Indicadores">
   <div class="kpi">
-    <p class="etiqueta"><span class="rombo"></span>Productos activos</p>
+    <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Productos activos</p>
     <p class="cifra">{{ total_productos }}</p>
     <p class="detalle">{{ unidades_totales|miles }} unidades en patio</p>
   </div>
   <div class="kpi">
-    <p class="etiqueta"><span class="rombo"></span>Valor del inventario</p>
+    <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Valor del inventario</p>
     <p class="cifra">{{ valor_total|cop }}</p>
     <p class="detalle">a precio de venta</p>
   </div>
   <div class="kpi">
-    <p class="etiqueta"><span class="rombo"></span>Pedidos pendientes</p>
+    <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Pedidos pendientes</p>
     <p class="cifra">{{ pendientes }}</p>
     <p class="detalle">{{ en_proceso }} en proceso de entrega</p>
   </div>
   <div class="kpi {% if stock_bajo_total %}kpi-alerta{% endif %}">
-    <p class="etiqueta"><span class="rombo"></span>Stock bajo</p>
+    <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Stock bajo</p>
     <p class="cifra">{{ stock_bajo_total }}</p>
     <p class="detalle">referencias por debajo del mínimo</p>
   </div>
@@ -41,13 +41,13 @@
 <div class="panel-doble">
   <section class="tarjeta">
     <div class="tarjeta-cabeza">
-      <h2><span class="rombo"></span>Stock por reponer</h2>
+      <h2><span class="hilada" aria-hidden="true"></span>Stock por reponer</h2>
       <a class="ver-todo" href="{% url 'productos_lista' %}?filtro=bajo">Ver todo</a>
     </div>
     <div class="tabla-envoltura">
       <table class="tabla">
         <thead>
-          <tr><th>Producto</th><th class="num">Stock</th><th class="num">Mínimo</th></tr>
+          <tr><th scope="col">Producto</th><th scope="col" class="num">Stock</th><th scope="col" class="num">Mínimo</th></tr>
         </thead>
         <tbody>
           {% for producto in stock_bajo %}
@@ -69,13 +69,13 @@
 
   <section class="tarjeta">
     <div class="tarjeta-cabeza">
-      <h2><span class="rombo"></span>Pedidos recientes</h2>
+      <h2><span class="hilada" aria-hidden="true"></span>Pedidos recientes</h2>
       <a class="ver-todo" href="{% url 'pedidos_lista' %}">Ver todo</a>
     </div>
     <div class="tabla-envoltura">
       <table class="tabla">
         <thead>
-          <tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th class="num">Total</th></tr>
+          <tr><th scope="col">Pedido</th><th scope="col">Cliente</th><th scope="col">Estado</th><th scope="col" class="num">Total</th></tr>
         </thead>
         <tbody>
           {% for pedido in ultimos_pedidos %}
@@ -101,13 +101,13 @@
 
 <section class="tarjeta">
   <div class="tarjeta-cabeza">
-    <h2><span class="rombo"></span>Últimos movimientos</h2>
+    <h2><span class="hilada" aria-hidden="true"></span>Últimos movimientos</h2>
     <a class="ver-todo" href="{% url 'movimientos_lista' %}">Ver todo</a>
   </div>
   <div class="tabla-envoltura">
     <table class="tabla">
       <thead>
-        <tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th class="num">Cantidad</th><th>Nota</th><th>Registró</th></tr>
+        <tr><th scope="col">Fecha</th><th scope="col">Tipo</th><th scope="col">Producto</th><th scope="col" class="num">Cantidad</th><th scope="col">Nota</th><th scope="col">Registró</th></tr>
       </thead>
       <tbody>
         {% for mov in movimientos %}

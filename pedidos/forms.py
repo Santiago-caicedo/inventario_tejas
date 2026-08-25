@@ -13,7 +13,7 @@ class ClienteForm(FormBase):
         fields = ['nombre', 'nit', 'telefono', 'email', 'ciudad', 'direccion', 'notas']
         widgets = {
             'nombre': forms.TextInput(attrs={'placeholder': 'Ferretería El Constructor'}),
-            'nit': forms.TextInput(attrs={'placeholder': '901.556.809-6'}),
+            'nit': forms.TextInput(attrs={'placeholder': '900.123.456-7'}),
         }
 
 

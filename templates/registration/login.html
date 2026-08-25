@@ -3,11 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Iniciar sesión · Tejas Santa Ana S.A.S</title>
-  <link rel="icon" href="{% static 'img/logo.svg' %}" type="image/svg+xml">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#2A1D14">
+  <title>Iniciar sesión · Terracogua Arcillas</title>
+
+  <link rel="icon" href="{% static 'img/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon-180.png' %}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 <body>
@@ -15,16 +20,15 @@
 
   <aside class="sesion-panel">
     <div class="sesion-marca">
-      <img src="{% static 'img/logo.svg' %}" alt="Logo de Tejas Santa Ana">
-      <span class="sesion-marca-texto">Tejas Santa Ana<small>S.A.S</small></span>
+      <img src="{% static 'img/logo-claro.png' %}" alt="Terracogua Arcillas" width="152" height="118">
     </div>
 
     <div class="sesion-lema">
-      <h2>Del horno<br>al patio,<br><em>todo contado.</em></h2>
+      <h2>Del horno al patio, <em>todo contado.</em></h2>
       <p>Inventario y pedidos de la planta, en un solo lugar.</p>
     </div>
 
-    <p class="sesion-nit">NIT 901.556.809-6</p>
+    <p class="sesion-pie">Sistema interno · Acceso autorizado</p>
   </aside>
 
   <div class="sesion-formulario">
@@ -33,7 +37,7 @@
       <p>Ingresa con tu usuario del sistema.</p>
 
       {% if form.errors %}
-        <div class="error-general">Usuario o contraseña incorrectos. Revisa e intenta de nuevo.</div>
+        <div class="error-general" role="alert">Usuario o contraseña incorrectos. Revisa e intenta de nuevo.</div>
       {% endif %}
 
       <form method="post">
@@ -47,7 +51,7 @@
           <input type="password" name="password" id="id_password" class="campo" autocomplete="current-password" required>
         </div>
         <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="boton boton-primario" style="width:100%; justify-content:center;">Entrar</button>
+        <button type="submit" class="boton boton-primario">Entrar</button>
       </form>
     </div>
   </div>

@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> Comercial</p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Comercial</p>
     <h1>Pedidos</h1>
   </div>
   <div class="acciones">
@@ -16,9 +16,9 @@
 
 <div class="filtros">
   <nav class="pestanas" aria-label="Filtrar por estado">
-    <a href="{% url 'pedidos_lista' %}" class="{% if not estado %}activa{% endif %}">Todos</a>
+    <a href="{% url 'pedidos_lista' %}" {% if not estado %}aria-current="page"{% endif %}>Todos</a>
     {% for valor, nombre in estados %}
-      <a href="{% url 'pedidos_lista' %}?estado={{ valor }}" class="{% if estado == valor %}activa{% endif %}">{{ nombre }}s</a>
+      <a href="{% url 'pedidos_lista' %}?estado={{ valor }}" {% if estado == valor %}aria-current="page"{% endif %}>{{ nombre }}s</a>
     {% endfor %}
   </nav>
   <form method="get">
@@ -33,8 +33,8 @@
     <table class="tabla">
       <thead>
         <tr>
-          <th>Pedido</th><th>Cliente</th><th>Creado</th><th>Entrega</th>
-          <th>Estado</th><th class="num">Unidades</th><th class="num">Total</th>
+          <th scope="col">Pedido</th><th scope="col">Cliente</th><th scope="col">Creado</th><th scope="col">Entrega</th>
+          <th scope="col">Estado</th><th scope="col" class="num">Unidades</th><th scope="col" class="num">Total</th>
         </tr>
       </thead>
       <tbody>

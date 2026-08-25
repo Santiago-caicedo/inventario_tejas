@@ -6,7 +6,7 @@
 {% block contenido %}
 <header class="encabezado">
   <div>
-    <p class="miga"><span class="rombo"></span> <a href="{% url 'productos_lista' %}">Productos</a> · <span class="mono">{{ producto.sku }}</span></p>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'productos_lista' %}">Productos</a> · <span class="mono">{{ producto.sku }}</span></p>
     <h1>{{ producto.nombre }}</h1>
   </div>
   <div class="acciones">
@@ -18,13 +18,13 @@
 <div class="detalle-columnas">
   <section class="tarjeta">
     <div class="tarjeta-cabeza">
-      <h2><span class="rombo"></span>Movimientos recientes</h2>
+      <h2><span class="hilada" aria-hidden="true"></span>Movimientos recientes</h2>
       <a class="ver-todo" href="{% url 'movimientos_lista' %}">Ver todos</a>
     </div>
     <div class="tabla-envoltura">
       <table class="tabla">
         <thead>
-          <tr><th>Fecha</th><th>Tipo</th><th class="num">Cantidad</th><th>Nota</th><th>Registró</th></tr>
+          <tr><th scope="col">Fecha</th><th scope="col">Tipo</th><th scope="col" class="num">Cantidad</th><th scope="col">Nota</th><th scope="col">Registró</th></tr>
         </thead>
         <tbody>
           {% for mov in movimientos %}
@@ -52,7 +52,7 @@
   </section>
 
   <aside class="tarjeta">
-    <div class="tarjeta-cabeza"><h2><span class="rombo"></span>Ficha</h2></div>
+    <div class="tarjeta-cabeza"><h2><span class="hilada" aria-hidden="true"></span>Ficha</h2></div>
     <div class="tarjeta-cuerpo">
       <ul class="ficha-datos">
         <li><span class="dato">Referencia</span><span class="valor mono">{{ producto.sku }}</span></li>

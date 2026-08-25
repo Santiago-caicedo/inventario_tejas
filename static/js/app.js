@@ -1,4 +1,4 @@
-// Interacciones del sistema — Tejas Santa Ana S.A.S
+// Interacciones del sistema — Terracogua Arcillas
 
 document.addEventListener('DOMContentLoaded', function () {
 

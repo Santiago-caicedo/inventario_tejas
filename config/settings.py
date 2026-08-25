@@ -19,6 +19,20 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
+# Django exige declarar los orígenes HTTPS de confianza para aceptar formularios
+# (POST). Si no se define en el .env, se derivan de ALLOWED_HOSTS.
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{h}' for h in ALLOWED_HOSTS
+        if h not in ('localhost', '127.0.0.1', '*') and not h.replace('.', '').isdigit()
+    ]
+
+# Detrás de un proxy o balanceador que termina el TLS (Apache, ALB), Django ve
+# la petición como HTTP salvo que confíe en esta cabecera.
+if os.getenv('USE_X_FORWARDED_PROTO', 'False').lower() in ('true', '1', 'yes'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

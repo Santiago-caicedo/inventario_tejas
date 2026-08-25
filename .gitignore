@@ -26,7 +26,7 @@ db.sqlite3-journal
 # Entorno / secretos
 .env
 .env.*
-!.env.example
+.env.example
 
 # Editores / SO
 .vscode/

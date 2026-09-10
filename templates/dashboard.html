@@ -10,12 +10,37 @@
     <h1>Tablero de planta</h1>
   </div>
   <div class="acciones">
-    <a class="boton boton-secundario" href="{% url 'movimiento_crear' %}">Registrar movimiento</a>
-    <a class="boton boton-primario" href="{% url 'pedido_crear' %}">Nuevo pedido</a>
+    {% if perms.inventario.gestionar_inventario %}
+      <a class="boton boton-secundario" href="{% url 'movimiento_crear' %}">Registrar movimiento</a>
+    {% endif %}
+    {% if perms.pedidos.gestionar_pedidos %}
+      <a class="boton boton-primario" href="{% url 'pedido_crear' %}">Nuevo pedido</a>
+    {% endif %}
   </div>
 </header>
 
-<section class="kpis" aria-label="Indicadores">
+{% if not perms.inventario.gestionar_inventario and not perms.pedidos.gestionar_pedidos %}
+<section class="tarjeta">
+  <div class="tarjeta-cabeza">
+    <h2><span class="hilada" aria-hidden="true"></span>Sin rol asignado</h2>
+  </div>
+  <div class="tarjeta-cuerpo">
+    <p class="texto-suave">
+      Tu usuario todavía no tiene un rol, así que no hay nada que mostrarte.
+      Pídele al administrador que te asigne <strong>Inventario</strong> o
+      <strong>Pedidos</strong>.
+    </p>
+  </div>
+</section>
+{% endif %}
+
+{% if perms.inventario.gestionar_inventario or perms.pedidos.gestionar_pedidos %}
+{% comment %}
+  Con un solo rol quedan menos de cuatro tarjetas: `kpis-parcial` evita que se
+  estiren a lo ancho de toda la fila. Ojo: {# … #} solo comenta una línea.
+{% endcomment %}
+<section class="kpis{% if not perms.inventario.gestionar_inventario or not perms.pedidos.gestionar_pedidos %} kpis-parcial{% endif %}" aria-label="Indicadores">
+  {% if perms.inventario.gestionar_inventario %}
   <div class="kpi">
     <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Productos activos</p>
     <p class="cifra">{{ total_productos }}</p>
@@ -26,18 +51,25 @@
     <p class="cifra">{{ valor_total|cop }}</p>
     <p class="detalle">a precio de venta</p>
   </div>
+  {% endif %}
+  {% if perms.pedidos.gestionar_pedidos %}
   <div class="kpi">
     <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Pedidos pendientes</p>
     <p class="cifra">{{ pendientes }}</p>
     <p class="detalle">{{ en_proceso }} en proceso de entrega</p>
   </div>
+  {% endif %}
+  {% if perms.inventario.gestionar_inventario %}
   <div class="kpi {% if stock_bajo_total %}kpi-alerta{% endif %}">
     <p class="etiqueta"><span class="hilada" aria-hidden="true"></span>Stock bajo</p>
     <p class="cifra">{{ stock_bajo_total }}</p>
     <p class="detalle">referencias por debajo del mínimo</p>
   </div>
+  {% endif %}
 </section>
+{% endif %}
 
+{% if perms.inventario.gestionar_inventario %}
 <section class="tarjeta separado-abajo">
   <div class="tarjeta-cabeza">
     <h2><span class="hilada" aria-hidden="true"></span>Unidades por producto</h2>
@@ -81,8 +113,10 @@
     </table>
   </div>
 </section>
+{% endif %}
 
 <div class="panel-doble">
+  {% if perms.inventario.gestionar_inventario %}
   <section class="tarjeta">
     <div class="tarjeta-cabeza">
       <h2><span class="hilada" aria-hidden="true"></span>Stock por reponer</h2>
@@ -110,7 +144,9 @@
       </table>
     </div>
   </section>
+  {% endif %}
 
+  {% if perms.pedidos.gestionar_pedidos %}
   <section class="tarjeta">
     <div class="tarjeta-cabeza">
       <h2><span class="hilada" aria-hidden="true"></span>Pedidos recientes</h2>
@@ -141,8 +177,10 @@
       </table>
     </div>
   </section>
+  {% endif %}
 </div>
 
+{% if perms.inventario.gestionar_inventario %}
 <section class="tarjeta">
   <div class="tarjeta-cabeza">
     <h2><span class="hilada" aria-hidden="true"></span>Últimos movimientos</h2>
@@ -172,4 +210,5 @@
     </table>
   </div>
 </section>
+{% endif %}
 {% endblock %}

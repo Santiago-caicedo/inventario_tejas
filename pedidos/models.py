@@ -39,6 +39,10 @@ class Pedido(models.Model):
 
     class Meta:
         ordering = ['-creado']
+        permissions = [
+            # Permiso de área: abre la sección comercial (clientes y pedidos).
+            ('gestionar_pedidos', 'Puede gestionar clientes y pedidos'),
+        ]
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

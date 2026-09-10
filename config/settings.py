@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inventario',
     'pedidos',
+    # De última: al migrar, sincroniza los grupos de roles y para eso necesita
+    # que los permisos de las apps anteriores ya existan.
+    'cuentas',
 ]
 
 MIDDLEWARE = [

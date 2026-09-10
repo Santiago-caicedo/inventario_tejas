@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, F, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
+from cuentas.roles import GESTIONAR_INVENTARIO, GESTIONAR_PEDIDOS, requiere_inventario
 from pedidos.models import Pedido
 
 from .forms import CategoriaForm, MovimientoForm, ProductoForm
@@ -13,41 +14,52 @@ from .services import StockInsuficiente, registrar_movimiento
 
 @login_required
 def dashboard(request):
-    productos = Producto.objects.filter(activo=True)
-    valor_total = productos.aggregate(v=Sum(F('precio') * F('stock')))['v'] or 0
-    stock_bajo = productos.filter(stock__lte=F('stock_minimo')).order_by(
-        F('stock') - F('stock_minimo')
-    )
-    pendientes = Pedido.objects.filter(estado=Pedido.Estado.PENDIENTE).count()
-    en_proceso = Pedido.objects.filter(
-        estado__in=[Pedido.Estado.CONFIRMADO, Pedido.Estado.DESPACHADO]
-    ).count()
+    """El tablero es de todos, pero cada rol solo ve sus propios indicadores.
 
-    # Unidades por producto, de mayor a menor. El ancho de la barra lo calcula
-    # {% widthratio %} en la plantilla: devuelve un entero sin localizar. Si se
-    # pasara un float, con LANGUAGE_CODE 'es-co' saldría "70,1%" y el navegador
-    # descartaría la regla CSS entera.
-    por_producto = list(productos.order_by('-stock', 'nombre'))
-    tope_stock = max((p.stock for p in por_producto), default=0) or 1
+    Las consultas van dentro de los `if`: a quien monta pedidos no se le
+    calcula el valor del inventario, que no va a poder ver.
+    """
+    ve_inventario = request.user.has_perm(GESTIONAR_INVENTARIO)
+    ve_pedidos = request.user.has_perm(GESTIONAR_PEDIDOS)
+    contexto = {'seccion': 'dashboard'}
 
-    contexto = {
-        'seccion': 'dashboard',
-        'por_producto': por_producto,
-        'tope_stock': tope_stock,
-        'total_productos': productos.count(),
-        'valor_total': valor_total,
-        'unidades_totales': productos.aggregate(u=Sum('stock'))['u'] or 0,
-        'stock_bajo': stock_bajo[:6],
-        'stock_bajo_total': stock_bajo.count(),
-        'pendientes': pendientes,
-        'en_proceso': en_proceso,
-        'movimientos': Movimiento.objects.select_related('producto', 'usuario')[:8],
-        'ultimos_pedidos': Pedido.objects.select_related('cliente').prefetch_related('items')[:6],
-    }
+    if ve_inventario:
+        productos = Producto.objects.filter(activo=True)
+        stock_bajo = productos.filter(stock__lte=F('stock_minimo')).order_by(
+            F('stock') - F('stock_minimo')
+        )
+
+        # Unidades por producto, de mayor a menor. El ancho de la barra lo calcula
+        # {% widthratio %} en la plantilla: devuelve un entero sin localizar. Si se
+        # pasara un float, con LANGUAGE_CODE 'es-co' saldría "70,1%" y el navegador
+        # descartaría la regla CSS entera.
+        por_producto = list(productos.order_by('-stock', 'nombre'))
+        tope_stock = max((p.stock for p in por_producto), default=0) or 1
+
+        contexto.update({
+            'por_producto': por_producto,
+            'tope_stock': tope_stock,
+            'total_productos': productos.count(),
+            'valor_total': productos.aggregate(v=Sum(F('precio') * F('stock')))['v'] or 0,
+            'unidades_totales': productos.aggregate(u=Sum('stock'))['u'] or 0,
+            'stock_bajo': stock_bajo[:6],
+            'stock_bajo_total': stock_bajo.count(),
+            'movimientos': Movimiento.objects.select_related('producto', 'usuario')[:8],
+        })
+
+    if ve_pedidos:
+        contexto.update({
+            'pendientes': Pedido.objects.filter(estado=Pedido.Estado.PENDIENTE).count(),
+            'en_proceso': Pedido.objects.filter(
+                estado__in=[Pedido.Estado.CONFIRMADO, Pedido.Estado.DESPACHADO]
+            ).count(),
+            'ultimos_pedidos': Pedido.objects.select_related('cliente').prefetch_related('items')[:6],
+        })
+
     return render(request, 'dashboard.html', contexto)
 
 
-@login_required
+@requiere_inventario
 def productos_lista(request):
     productos = Producto.objects.select_related('categoria')
     busqueda = request.GET.get('q', '').strip()
@@ -76,7 +88,7 @@ def productos_lista(request):
     })
 
 
-@login_required
+@requiere_inventario
 def producto_crear(request):
     form = ProductoForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -88,7 +100,7 @@ def producto_crear(request):
     })
 
 
-@login_required
+@requiere_inventario
 def producto_editar(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     form = ProductoForm(request.POST or None, instance=producto)
@@ -101,7 +113,7 @@ def producto_editar(request, pk):
     })
 
 
-@login_required
+@requiere_inventario
 def producto_detalle(request, pk):
     producto = get_object_or_404(Producto.objects.select_related('categoria'), pk=pk)
     movimientos = producto.movimientos.select_related('usuario', 'pedido')[:20]
@@ -110,7 +122,7 @@ def producto_detalle(request, pk):
     })
 
 
-@login_required
+@requiere_inventario
 def categorias_lista(request):
     categorias = Categoria.objects.annotate(
         total=Count('productos', filter=Q(productos__activo=True))
@@ -120,7 +132,7 @@ def categorias_lista(request):
     })
 
 
-@login_required
+@requiere_inventario
 def categoria_crear(request):
     form = CategoriaForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -132,7 +144,7 @@ def categoria_crear(request):
     })
 
 
-@login_required
+@requiere_inventario
 def movimientos_lista(request):
     movimientos = Movimiento.objects.select_related('producto', 'usuario', 'pedido')
     tipo = request.GET.get('tipo', '')
@@ -145,7 +157,7 @@ def movimientos_lista(request):
     })
 
 
-@login_required
+@requiere_inventario
 def movimiento_crear(request):
     inicial = {}
     producto_id = request.GET.get('producto')

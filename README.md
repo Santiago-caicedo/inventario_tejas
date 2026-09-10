@@ -19,6 +19,38 @@ Sistema web de gestión de inventario y pedidos para la planta, construido con D
   inventario suficiente, el sistema no deja despachar.
   Cada pedido tiene una vista de remisión imprimible desde **Ver recibo**.
 
+## Roles y accesos
+
+Hay dos roles, uno por área de trabajo. Se crean solos al correr `migrate` y
+están definidos en `cuentas/roles.py`:
+
+| Rol | Entra a | No entra a |
+|---|---|---|
+| **Inventario** | Productos, categorías y movimientos | Clientes y pedidos |
+| **Pedidos** | Clientes y pedidos, con su flujo de estados | Productos, categorías y movimientos |
+
+Quien monta pedidos sí ve los productos y sus precios **dentro del formulario
+del pedido** — los necesita para armarlo —, pero no puede abrir la sección de
+inventario ni tocar el catálogo. Ninguno de los dos roles borra nada, y los
+movimientos no se editan: son el rastro contable del stock.
+
+El tablero lo ve todo el mundo, pero cada quien solo ve sus propios indicadores;
+en el menú lateral no aparece lo que no se puede abrir. Un **superusuario** entra
+a todo sin pertenecer a ningún rol.
+
+Para asignarlos: Administración → Usuarios → *Grupos*, o desde la línea de
+comandos:
+
+```bash
+python manage.py roles                              # ver el estado
+python manage.py roles --asignar juan --rol inventario
+python manage.py roles --quitar juan --rol pedidos
+```
+
+Los permisos de cada grupo se rehacen en cada `migrate` a partir del código, así
+que editarlos a mano en Administración no sobrevive a un despliegue. Para darle
+algo puntual a una sola persona, usar sus permisos de usuario.
+
 ## Cómo ejecutarlo
 
 El proyecto usa **PostgreSQL** y lee su configuración de un archivo `.env`
@@ -69,9 +101,11 @@ python manage.py datos_demo
 | `config/` | Configuración del proyecto |
 | `inventario/` | Productos, categorías y movimientos de stock |
 | `pedidos/` | Clientes, pedidos y su flujo de estados |
+| `cuentas/` | Roles de acceso y quién entra a cada sección |
 | `templates/` | Plantillas HTML |
 | `static/` | Estilos, logo e interacciones |
 
+Quién puede entrar a cada sección se decide en `cuentas/roles.py`.
 La regla de negocio central vive en `inventario/services.py`
 (`registrar_movimiento`, único punto que toca el stock) y en
 `pedidos/services.py` (`cambiar_estado`, transiciones del pedido).

@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from cuentas.roles import requiere_pedidos
 from inventario.models import Producto
 from inventario.services import StockInsuficiente
 
@@ -17,7 +17,7 @@ from .services import TransicionInvalida, cambiar_estado, stock_descontado
 
 # ----- Clientes -----
 
-@login_required
+@requiere_pedidos
 def clientes_lista(request):
     clientes = Cliente.objects.all()
     busqueda = request.GET.get('q', '').strip()
@@ -31,7 +31,7 @@ def clientes_lista(request):
     })
 
 
-@login_required
+@requiere_pedidos
 def cliente_crear(request):
     form = ClienteForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -43,7 +43,7 @@ def cliente_crear(request):
     })
 
 
-@login_required
+@requiere_pedidos
 def cliente_editar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     form = ClienteForm(request.POST or None, instance=cliente)
@@ -56,7 +56,7 @@ def cliente_editar(request, pk):
     })
 
 
-@login_required
+@requiere_pedidos
 def cliente_detalle(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     pedidos = cliente.pedidos.prefetch_related('items')[:20]
@@ -67,7 +67,7 @@ def cliente_detalle(request, pk):
 
 # ----- Pedidos -----
 
-@login_required
+@requiere_pedidos
 def pedidos_lista(request):
     pedidos = Pedido.objects.select_related('cliente').prefetch_related('items')
     estado = request.GET.get('estado', '')
@@ -93,7 +93,7 @@ def _precios_productos():
     }
 
 
-@login_required
+@requiere_pedidos
 def pedido_crear(request):
     pedido = Pedido(usuario=request.user)
     form = PedidoForm(request.POST or None, instance=pedido)
@@ -110,7 +110,7 @@ def pedido_crear(request):
     })
 
 
-@login_required
+@requiere_pedidos
 def pedido_editar(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     # Los datos y los ítems solo se tocan mientras el pedido está pendiente;
@@ -161,7 +161,7 @@ def pedido_editar(request, pk):
     })
 
 
-@login_required
+@requiere_pedidos
 def pedido_detalle(request, pk):
     pedido = get_object_or_404(
         Pedido.objects.select_related('cliente', 'usuario').prefetch_related('items__producto'),
@@ -196,7 +196,7 @@ def pedido_detalle(request, pk):
     })
 
 
-@login_required
+@requiere_pedidos
 @require_POST
 def pedido_cambiar_estado(request, pk, estado):
     pedido = get_object_or_404(Pedido, pk=pk)

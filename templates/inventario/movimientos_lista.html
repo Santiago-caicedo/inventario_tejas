@@ -39,7 +39,7 @@
             <span class="sub mono">{{ mov.producto.sku }}</span>
           </td>
           <td class="num">{{ mov.efecto|miles }}</td>
-          <td>{% if mov.pedido %}<a class="mono" href="{% url 'pedido_detalle' mov.pedido.pk %}">{{ mov.pedido.numero }}</a>{% else %}<span class="texto-suave">—</span>{% endif %}</td>
+          <td>{% if mov.pedido %}{% if perms.pedidos.gestionar_pedidos %}<a class="mono" href="{% url 'pedido_detalle' mov.pedido.pk %}">{{ mov.pedido.numero }}</a>{% else %}<span class="mono">{{ mov.pedido.numero }}</span>{% endif %}{% else %}<span class="texto-suave">—</span>{% endif %}</td>
           <td class="texto-suave">{{ mov.nota|default:'—'|truncatechars:36 }}</td>
           <td class="texto-suave">{{ mov.usuario.username|default:'—' }}</td>
         </tr>

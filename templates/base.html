@@ -32,6 +32,8 @@
         <span class="hilada" aria-hidden="true"></span>Tablero
       </a>
 
+      {# Cada rol solo ve en el menú las secciones a las que puede entrar. #}
+      {% if perms.inventario.gestionar_inventario %}
       <p class="nav-titulo">Operación</p>
       <a class="nav-item" href="{% url 'productos_lista' %}" {% if seccion == 'productos' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Productos
@@ -42,7 +44,9 @@
       <a class="nav-item" href="{% url 'movimientos_lista' %}" {% if seccion == 'movimientos' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Movimientos
       </a>
+      {% endif %}
 
+      {% if perms.pedidos.gestionar_pedidos %}
       <p class="nav-titulo">Comercial</p>
       <a class="nav-item" href="{% url 'pedidos_lista' %}" {% if seccion == 'pedidos' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Pedidos
@@ -50,13 +54,14 @@
       <a class="nav-item" href="{% url 'clientes_lista' %}" {% if seccion == 'clientes' %}aria-current="page"{% endif %}>
         <span class="hilada" aria-hidden="true"></span>Clientes
       </a>
+      {% endif %}
     </div>
 
     <div class="nav-pie">
       <div class="nav-usuario">
         <span class="nav-usuario-datos">
           <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-          <span class="nav-usuario-rol">{% if request.user.is_staff %}Administrador{% else %}Operación{% endif %}</span>
+          <span class="nav-usuario-rol">{% if request.user.is_superuser %}Administrador{% else %}{{ request.user.groups.all|join:" · "|default:"Sin rol asignado" }}{% endif %}</span>
         </span>
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}

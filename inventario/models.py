@@ -37,6 +37,12 @@ class Producto(models.Model):
 
     class Meta:
         ordering = ['nombre']
+        permissions = [
+            # Permiso de área: abre toda la sección de inventario (productos,
+            # categorías y movimientos). Va colgado de Producto porque Django
+            # exige colgar los permisos de algún modelo.
+            ('gestionar_inventario', 'Puede gestionar el inventario'),
+        ]
 
     def __str__(self):
         return f'{self.sku} · {self.nombre}'

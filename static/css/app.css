@@ -456,6 +456,14 @@ img { max-width: 100%; height: auto; }
   margin-bottom: 26px;
 }
 
+/* Con un solo rol el tablero muestra menos indicadores. Sin esto las dos o tres
+   tarjetas que quedan se estirarían a lo ancho de toda la fila y se verían como
+   un error de maquetación. En pantalla angosta manda la regla del media query. */
+.kpis-parcial {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 780px;
+}
+
 .kpi {
   position: relative;
   background: var(--lienzo);
@@ -538,6 +546,9 @@ img { max-width: 100%; height: auto; }
   gap: 14px;
   margin-bottom: 14px;
 }
+
+/* Si el rol solo alcanza una de las dos tarjetas, ocupa la fila entera. */
+.panel-doble > :only-child { grid-column: 1 / -1; }
 
 /* ============================================================================
    Tablas

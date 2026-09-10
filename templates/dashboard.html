@@ -38,6 +38,50 @@
   </div>
 </section>
 
+<section class="tarjeta separado-abajo">
+  <div class="tarjeta-cabeza">
+    <h2><span class="hilada" aria-hidden="true"></span>Unidades por producto</h2>
+    <a class="ver-todo" href="{% url 'productos_lista' %}">Ver productos</a>
+  </div>
+  <div class="tabla-envoltura">
+    <table class="tabla tabla-barras">
+      <thead>
+        <tr>
+          <th scope="col">Producto</th>
+          <th scope="col" class="col-barra">Proporción del patio</th>
+          <th scope="col" class="num">Unidades</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in por_producto %}
+        <tr>
+          <td class="celda-principal">
+            <a href="{% url 'producto_detalle' producto.pk %}">{{ producto.nombre }}</a>
+            <span class="sub mono">{{ producto.sku }} · {{ producto.get_unidad_display }}</span>
+          </td>
+          <td class="col-barra">
+            <span class="barra">
+              <span class="barra-valor" style="width: {% widthratio producto.stock tope_stock 100 %}%"></span>
+            </span>
+          </td>
+          <td class="num">
+            <span class="{% if producto.stock_bajo %}stock-bajo{% endif %}">{{ producto.stock|miles }}</span>
+            {% if producto.stock_bajo %}<span class="marca-bajo">Reponer</span>{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="3">
+            Todavía no hay productos activos.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'producto_crear' %}">Crear producto</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <div class="panel-doble">
   <section class="tarjeta">
     <div class="tarjeta-cabeza">

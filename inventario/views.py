@@ -23,8 +23,17 @@ def dashboard(request):
         estado__in=[Pedido.Estado.CONFIRMADO, Pedido.Estado.DESPACHADO]
     ).count()
 
+    # Unidades por producto, de mayor a menor. El ancho de la barra lo calcula
+    # {% widthratio %} en la plantilla: devuelve un entero sin localizar. Si se
+    # pasara un float, con LANGUAGE_CODE 'es-co' saldría "70,1%" y el navegador
+    # descartaría la regla CSS entera.
+    por_producto = list(productos.order_by('-stock', 'nombre'))
+    tope_stock = max((p.stock for p in por_producto), default=0) or 1
+
     contexto = {
         'seccion': 'dashboard',
+        'por_producto': por_producto,
+        'tope_stock': tope_stock,
         'total_productos': productos.count(),
         'valor_total': valor_total,
         'unidades_totales': productos.aggregate(u=Sum('stock'))['u'] or 0,

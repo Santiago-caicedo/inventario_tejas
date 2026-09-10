@@ -69,6 +69,67 @@ ROLES = {
 SIN_PERMISO = 'Tu usuario no tiene acceso a esa sección.'
 
 
+# --- Roles como se eligen en la pantalla de usuarios -------------------------
+#
+# Un usuario tiene un rol, no una lista de permisos sueltos: es lo que se puede
+# explicar en la planta. «Administrador» no es un grupo sino un superusuario,
+# que entra a todo sin que haya que darle permiso por permiso.
+
+ADMINISTRADOR = 'admin'
+SIN_ROL = 'sin-rol'
+
+COMBINACIONES = {
+    'inventario': ('Inventario', (INVENTARIO,)),
+    'pedidos': ('Pedidos', (PEDIDOS,)),
+    'ambos': ('Inventario y pedidos', (INVENTARIO, PEDIDOS)),
+    ADMINISTRADOR: ('Administrador', ()),
+}
+
+AYUDA_ROL = {
+    'inventario': 'Productos, categorías y movimientos de stock.',
+    'pedidos': 'Clientes y pedidos, con su flujo de estados.',
+    'ambos': 'Las dos áreas de operación.',
+    ADMINISTRADOR: 'Entra a todo, incluidos los usuarios y la administración del sistema.',
+}
+
+
+def opciones_de_rol():
+    """Las opciones del selector de rol, en el orden en que se muestran."""
+    return [(clave, etiqueta) for clave, (etiqueta, _) in COMBINACIONES.items()]
+
+
+def rol_de(usuario):
+    """Clave del rol que tiene el usuario, o SIN_ROL si todavía no tiene."""
+    if usuario.is_superuser:
+        return ADMINISTRADOR
+    suyos = {
+        nombre for nombre in usuario.groups.values_list('name', flat=True)
+        if nombre in (INVENTARIO, PEDIDOS)
+    }
+    for clave, (_, nombres) in COMBINACIONES.items():
+        if nombres and set(nombres) == suyos:
+            return clave
+    return SIN_ROL
+
+
+def etiqueta_rol(clave):
+    return COMBINACIONES.get(clave, ('Sin rol', ()))[0]
+
+
+def aplicar_rol(usuario, clave):
+    """Deja al usuario exactamente con el rol elegido, sin restos del anterior."""
+    from django.contrib.auth.models import Group
+
+    _, nombres = COMBINACIONES[clave]
+    es_admin = clave == ADMINISTRADOR
+    usuario.is_superuser = es_admin
+    # `is_staff` es lo que abre /admin/. Va junto con el rol de administrador:
+    # los roles de operación trabajan solo dentro de la aplicación.
+    usuario.is_staff = es_admin
+    usuario.save(update_fields=['is_superuser', 'is_staff'])
+    usuario.groups.set(Group.objects.filter(name__in=nombres))
+
+
 def sincronizar_roles():
     """Crea los grupos y les deja exactamente los permisos declarados arriba.
 
@@ -118,3 +179,21 @@ def requiere(permiso):
 
 requiere_inventario = requiere(GESTIONAR_INVENTARIO)
 requiere_pedidos = requiere(GESTIONAR_PEDIDOS)
+
+
+def solo_administrador(vista):
+    """Para lo que crea o cambia usuarios: reservado a los superusuarios.
+
+    No basta con `is_staff`: quien reparte los accesos es quien ya los tiene
+    todos.
+    """
+
+    @login_required
+    @wraps(vista)
+    def envoltura(request, *args, **kwargs):
+        if not request.user.is_superuser:
+            messages.error(request, SIN_PERMISO)
+            return redirect('dashboard')
+        return vista(request, *args, **kwargs)
+
+    return envoltura

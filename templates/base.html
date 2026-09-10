@@ -55,6 +55,13 @@
         <span class="hilada" aria-hidden="true"></span>Clientes
       </a>
       {% endif %}
+
+      {% if request.user.is_superuser %}
+      <p class="nav-titulo">Sistema</p>
+      <a class="nav-item" href="{% url 'usuarios_lista' %}" {% if seccion == 'usuarios' %}aria-current="page"{% endif %}>
+        <span class="hilada" aria-hidden="true"></span>Usuarios
+      </a>
+      {% endif %}
     </div>
 
     <div class="nav-pie">

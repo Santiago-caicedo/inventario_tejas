@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Usuarios{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> Sistema</p>
+    <h1>Usuarios</h1>
+  </div>
+  <div class="acciones">
+    <a class="boton boton-primario" href="{% url 'usuario_crear' %}">Nuevo usuario</a>
+  </div>
+</header>
+
+<div class="filtros">
+  <form method="get">
+    <input class="campo buscador" type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por usuario o nombre…">
+    <button class="boton boton-secundario" type="submit">Buscar</button>
+  </form>
+</div>
+
+<section class="tarjeta">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th scope="col">Usuario</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Último ingreso</th></tr>
+      </thead>
+      <tbody>
+        {% for fila in filas %}
+        <tr>
+          <td class="celda-principal">
+            <a href="{% url 'usuario_editar' fila.usuario.pk %}">{{ fila.usuario.username }}</a>
+            <span class="sub">{{ fila.usuario.get_full_name|default:'Sin nombre registrado' }}</span>
+          </td>
+          <td class="texto-suave">{{ fila.usuario.email|default:'—' }}</td>
+          <td><span class="chip chip-{{ fila.rol }}">{{ fila.etiqueta }}</span></td>
+          <td>
+            {% if fila.usuario.is_active %}
+              <span class="texto-suave">Activo</span>
+            {% else %}
+              <span class="chip chip-inactivo">Inactivo</span>
+            {% endif %}
+          </td>
+          <td class="texto-suave">{{ fila.usuario.last_login|date:'d M Y, g:i a'|default:'Nunca ha entrado' }}</td>
+        </tr>
+        {% empty %}
+        <tr class="fila-vacia">
+          <td colspan="5">
+            Ningún usuario coincide con la búsqueda.<br>
+            <a class="boton boton-primario boton-mini" href="{% url 'usuario_crear' %}">Crear usuario</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include 'partes/paginacion.html' %}
+{% endblock %}

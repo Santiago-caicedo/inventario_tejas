@@ -186,3 +186,151 @@ class RolesTest(TestCase):
                 self.assertRedirects(
                     self.client.get(url), f'{reverse("login")}?next={url}'
                 )
+
+
+class UsuariosDesdeElFrontTest(TestCase):
+    """El superadministrador crea y edita las cuentas sin entrar a /admin/."""
+
+    CLAVE = 'planta-2026-teja'
+
+    @classmethod
+    def setUpTestData(cls):
+        sincronizar_roles()
+        cls.jefe = User.objects.create_superuser('jefe', password=cls.CLAVE)
+        cls.bodeguero = User.objects.create_user('bodeguero', password=cls.CLAVE)
+        cls.bodeguero.groups.add(Group.objects.get(name=INVENTARIO))
+
+    def datos(self, **cambios):
+        base = {
+            'username': 'jperez',
+            'first_name': 'Juan',
+            'last_name': 'Pérez',
+            'email': 'juan@ejemplo.com',
+            'rol': 'pedidos',
+            'contrasena': self.CLAVE,
+            'contrasena2': self.CLAVE,
+        }
+        base.update(cambios)
+        return base
+
+    # --- quién entra a la pantalla ---
+
+    def test_solo_el_administrador_abre_usuarios(self):
+        self.client.force_login(self.bodeguero)
+        for nombre in ('usuarios_lista', 'usuario_crear'):
+            with self.subTest(vista=nombre):
+                self.assertRedirects(self.client.get(reverse(nombre)), reverse('dashboard'))
+
+        self.client.force_login(self.jefe)
+        self.assertEqual(self.client.get(reverse('usuarios_lista')).status_code, 200)
+
+    def test_un_operario_no_crea_usuarios_ni_por_POST(self):
+        self.client.force_login(self.bodeguero)
+        self.assertRedirects(
+            self.client.post(reverse('usuario_crear'), self.datos()), reverse('dashboard')
+        )
+        self.assertFalse(User.objects.filter(username='jperez').exists())
+
+    def test_el_menu_ofrece_usuarios_solo_al_administrador(self):
+        self.client.force_login(self.jefe)
+        self.assertContains(self.client.get(reverse('dashboard')), reverse('usuarios_lista'))
+        self.client.force_login(self.bodeguero)
+        self.assertNotContains(self.client.get(reverse('dashboard')), reverse('usuarios_lista'))
+
+    # --- crear ---
+
+    def test_crear_usuario_con_rol_y_que_pueda_entrar(self):
+        self.client.force_login(self.jefe)
+        respuesta = self.client.post(reverse('usuario_crear'), self.datos())
+        self.assertRedirects(respuesta, reverse('usuarios_lista'))
+
+        nuevo = User.objects.get(username='jperez')
+        self.assertEqual(list(nuevo.groups.values_list('name', flat=True)), [PEDIDOS])
+        self.assertTrue(nuevo.has_perm('pedidos.gestionar_pedidos'))
+        self.assertFalse(nuevo.has_perm('inventario.gestionar_inventario'))
+        self.assertFalse(nuevo.is_staff)
+        self.assertTrue(self.client.login(username='jperez', password=self.CLAVE))
+
+    def test_crear_administrador(self):
+        self.client.force_login(self.jefe)
+        self.client.post(reverse('usuario_crear'), self.datos(username='otro', rol='admin'))
+        otro = User.objects.get(username='otro')
+        self.assertTrue(otro.is_superuser)
+        self.assertTrue(otro.is_staff)
+        self.assertEqual(otro.groups.count(), 0)
+
+    def test_crear_con_los_dos_roles(self):
+        self.client.force_login(self.jefe)
+        self.client.post(reverse('usuario_crear'), self.datos(username='todero', rol='ambos'))
+        todero = User.objects.get(username='todero')
+        self.assertTrue(todero.has_perm('inventario.gestionar_inventario'))
+        self.assertTrue(todero.has_perm('pedidos.gestionar_pedidos'))
+
+    def test_las_contrasenas_tienen_que_coincidir(self):
+        self.client.force_login(self.jefe)
+        respuesta = self.client.post(
+            reverse('usuario_crear'), self.datos(contrasena2='otra-cosa-distinta')
+        )
+        self.assertContains(respuesta, 'no coinciden')
+        self.assertFalse(User.objects.filter(username='jperez').exists())
+
+    def test_una_contrasena_floja_se_rechaza(self):
+        self.client.force_login(self.jefe)
+        respuesta = self.client.post(
+            reverse('usuario_crear'), self.datos(contrasena='12345', contrasena2='12345')
+        )
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(User.objects.filter(username='jperez').exists())
+
+    # --- editar ---
+
+    def test_cambiar_de_rol_no_deja_restos_del_anterior(self):
+        self.client.force_login(self.jefe)
+        url = reverse('usuario_editar', kwargs={'pk': self.bodeguero.pk})
+        self.client.post(url, self.datos(
+            username='bodeguero', rol='pedidos', contrasena='', contrasena2='', is_active='on',
+        ))
+        self.bodeguero.refresh_from_db()
+        self.assertEqual(list(self.bodeguero.groups.values_list('name', flat=True)), [PEDIDOS])
+
+    def test_editar_sin_contrasena_conserva_la_que_tenia(self):
+        self.client.force_login(self.jefe)
+        url = reverse('usuario_editar', kwargs={'pk': self.bodeguero.pk})
+        self.client.post(url, self.datos(
+            username='bodeguero', first_name='Ana', rol='inventario',
+            contrasena='', contrasena2='', is_active='on',
+        ))
+        self.bodeguero.refresh_from_db()
+        self.assertEqual(self.bodeguero.first_name, 'Ana')
+        self.assertTrue(self.client.login(username='bodeguero', password=self.CLAVE))
+
+    def test_desactivar_a_alguien_le_cierra_la_entrada(self):
+        self.client.force_login(self.jefe)
+        url = reverse('usuario_editar', kwargs={'pk': self.bodeguero.pk})
+        self.client.post(url, self.datos(username='bodeguero', rol='inventario',
+                                         contrasena='', contrasena2=''))
+        self.bodeguero.refresh_from_db()
+        self.assertFalse(self.bodeguero.is_active)
+        self.assertFalse(self.client.login(username='bodeguero', password=self.CLAVE))
+
+    # --- no cerrarse la puerta a uno mismo ---
+
+    def test_no_puede_quitarse_su_propio_rol_de_administrador(self):
+        self.client.force_login(self.jefe)
+        url = reverse('usuario_editar', kwargs={'pk': self.jefe.pk})
+        respuesta = self.client.post(url, self.datos(
+            username='jefe', rol='pedidos', contrasena='', contrasena2='', is_active='on',
+        ))
+        self.assertEqual(respuesta.status_code, 200)
+        self.jefe.refresh_from_db()
+        self.assertTrue(self.jefe.is_superuser)
+
+    def test_no_puede_desactivarse_a_si_mismo(self):
+        self.client.force_login(self.jefe)
+        url = reverse('usuario_editar', kwargs={'pk': self.jefe.pk})
+        respuesta = self.client.post(url, self.datos(
+            username='jefe', rol='admin', contrasena='', contrasena2='',
+        ))
+        self.assertContains(respuesta, 'No puedes desactivar tu propio usuario')
+        self.jefe.refresh_from_db()
+        self.assertTrue(self.jefe.is_active)

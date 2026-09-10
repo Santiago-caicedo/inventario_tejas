@@ -38,8 +38,21 @@ El tablero lo ve todo el mundo, pero cada quien solo ve sus propios indicadores;
 en el menú lateral no aparece lo que no se puede abrir. Un **superusuario** entra
 a todo sin pertenecer a ningún rol.
 
-Para asignarlos: Administración → Usuarios → *Grupos*, o desde la línea de
-comandos:
+### Crear usuarios
+
+Con una cuenta de **administrador** aparece **Sistema → Usuarios** en el menú
+lateral. Desde ahí se crea la gente del equipo sin pasar por `/admin/`: nombre,
+usuario, correo, rol y contraseña. Al editar, la contraseña en blanco deja la que
+ya tenía, y el interruptor *puede entrar al sistema* desactiva a alguien sin
+borrarle el historial de movimientos y pedidos.
+
+El selector de rol ofrece **Inventario**, **Pedidos**, **Inventario y pedidos** y
+**Administrador**. Cambiar de rol reemplaza el anterior, no lo suma. Nadie puede
+quitarse a sí mismo el rol de administrador ni desactivar su propia cuenta: si no,
+el último administrador podría dejarse por fuera.
+
+También se puede hacer desde Administración → Usuarios → *Grupos*, o en el
+servidor por línea de comandos:
 
 ```bash
 python manage.py roles                              # ver el estado
@@ -101,7 +114,7 @@ python manage.py datos_demo
 | `config/` | Configuración del proyecto |
 | `inventario/` | Productos, categorías y movimientos de stock |
 | `pedidos/` | Clientes, pedidos y su flujo de estados |
-| `cuentas/` | Roles de acceso y quién entra a cada sección |
+| `cuentas/` | Roles de acceso, pantalla de usuarios y quién entra a cada sección |
 | `templates/` | Plantillas HTML |
 | `static/` | Estilos, logo e interacciones |
 

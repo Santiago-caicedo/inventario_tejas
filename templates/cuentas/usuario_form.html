@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <p class="miga"><span class="hilada" aria-hidden="true"></span> <a href="{% url 'usuarios_lista' %}">Usuarios</a></p>
+    <h1>{{ titulo }}</h1>
+  </div>
+</header>
+
+<section class="tarjeta formulario">
+  <div class="tarjeta-cuerpo">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="error-general">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.first_name %}
+        {% include 'partes/campo.html' with campo=form.last_name %}
+      </div>
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.username %}
+        {% include 'partes/campo.html' with campo=form.email %}
+      </div>
+
+      {% include 'partes/campo.html' with campo=form.rol %}
+      <ul class="leyenda-roles">
+        {% for etiqueta, ayuda in ayudas %}
+        <li><strong>{{ etiqueta }}:</strong> {{ ayuda }}</li>
+        {% endfor %}
+      </ul>
+
+      <div class="form-fila">
+        {% include 'partes/campo.html' with campo=form.contrasena %}
+        {% include 'partes/campo.html' with campo=form.contrasena2 %}
+      </div>
+
+      {% if not form.creando %}{% include 'partes/campo.html' with campo=form.is_active %}{% endif %}
+
+      <div class="form-acciones">
+        <button type="submit" class="boton boton-primario">Guardar usuario</button>
+        <a class="boton boton-secundario" href="{% url 'usuarios_lista' %}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

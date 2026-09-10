@@ -650,6 +650,30 @@ table.tabla {
 .chip-entregado  { background: var(--verde-velo);  color: var(--verde);  border-color: var(--verde-borde); }
 .chip-cancelado  { background: var(--alarma-velo); color: var(--alarma); border-color: var(--alarma-borde); }
 
+/* Roles de usuario. El administrador va en ámbar porque es el único que
+   cambia accesos: conviene que salte a la vista en la lista. */
+.chip-admin      { background: var(--ambar-velo);  color: var(--ambar);  border-color: var(--ambar-borde); }
+.chip-inventario { background: var(--acento-velo); color: var(--acento); border-color: var(--borde-firme); }
+.chip-pedidos    { background: var(--verde-velo);  color: var(--verde);  border-color: var(--verde-borde); }
+.chip-ambos      { background: var(--neutro-velo); color: var(--neutro); border-color: var(--neutro-borde); }
+.chip-sin-rol    { background: var(--neutro-velo); color: var(--neutro); border-color: var(--neutro-borde); }
+.chip-inactivo   { background: var(--alarma-velo); color: var(--alarma); border-color: var(--alarma-borde); }
+
+/* Qué hace cada rol, junto al selector del formulario de usuario. */
+.leyenda-roles {
+  list-style: none;
+  margin: -6px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  background: var(--lienzo-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--tinta-suave);
+}
+
+.leyenda-roles strong { color: var(--tinta); font-weight: 600; }
+
 .chip-entrada { background: var(--verde-velo);  color: var(--verde);  border-color: var(--verde-borde); }
 .chip-salida  { background: var(--acento-velo); color: var(--acento); border-color: var(--borde-firme); }
 .chip-ajuste  { background: var(--neutro-velo); color: var(--neutro); border-color: var(--neutro-borde); }

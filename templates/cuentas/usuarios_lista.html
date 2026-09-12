@@ -24,7 +24,11 @@
   <div class="tabla-envoltura">
     <table class="tabla">
       <thead>
-        <tr><th scope="col">Usuario</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Último ingreso</th></tr>
+        <tr>
+          <th scope="col">Usuario</th><th scope="col">Correo</th><th scope="col">Rol</th>
+          <th scope="col">Estado</th><th scope="col">Último ingreso</th>
+          <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+        </tr>
       </thead>
       <tbody>
         {% for fila in filas %}
@@ -43,10 +47,15 @@
             {% endif %}
           </td>
           <td class="texto-suave">{{ fila.usuario.last_login|date:'d M Y, g:i a'|default:'Nunca ha entrado' }}</td>
+          <td class="texto-derecha">
+            <a class="boton boton-secundario boton-mini" href="{% url 'usuario_editar' fila.usuario.pk %}">
+              Editar<span class="visualmente-oculto"> el usuario {{ fila.usuario.username }}</span>
+            </a>
+          </td>
         </tr>
         {% empty %}
         <tr class="fila-vacia">
-          <td colspan="5">
+          <td colspan="6">
             Ningún usuario coincide con la búsqueda.<br>
             <a class="boton boton-primario boton-mini" href="{% url 'usuario_crear' %}">Crear usuario</a>
           </td>

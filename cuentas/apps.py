@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.contrib.auth.signals import user_logged_in
 from django.db.models.signals import post_migrate
 
 
@@ -20,3 +21,8 @@ class CuentasConfig(AppConfig):
         # señal, django.contrib.auth ya creó los permisos de inventario y
         # pedidos y hay algo que asignarle a los grupos.
         post_migrate.connect(_sincronizar, sender=self)
+
+        # Marca a qué hora entró cada quien, para el tope de duración.
+        from .sesiones import marcar_inicio
+
+        user_logged_in.connect(marcar_inicio, dispatch_uid='cuentas.marcar_inicio')

@@ -54,6 +54,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Después de AuthenticationMiddleware: necesita saber quién es el usuario.
+    'cuentas.sesiones.CierreDeSesion',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -155,6 +157,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+# --- Cierre automático de la sesión ----------------------------------------
+# Dos plazos, los dos en el .env y los dos apagables con 0:
+#   - inactividad: se cierra tras un rato sin tocar nada (el equipo del patio
+#     queda encendido y a la vista).
+#   - máximo: se cierra al cumplirse, se esté usando o no.
+# Los aplica `cuentas.sesiones.CierreDeSesion`.
+SESION_INACTIVIDAD = int(os.getenv('SESION_INACTIVIDAD_MIN', '30')) * 60
+SESION_MAXIMA = int(os.getenv('SESION_MAXIMA_HORAS', '12')) * 3600
+
+# La cookie no debe sobrevivir al tope: si el navegador se queda cerrado más
+# tiempo del permitido, al volver ya no hay sesión que revisar.
+if SESION_MAXIMA:
+    SESSION_COOKIE_AGE = SESION_MAXIMA
 
 
 # Datos del emisor que salen impresos en la remisión. Van en el .env porque

@@ -64,6 +64,18 @@ Los permisos de cada grupo se rehacen en cada `migrate` a partir del código, as
 que editarlos a mano en Administración no sobrevive a un despliegue. Para darle
 algo puntual a una sola persona, usar sus permisos de usuario.
 
+### Cierre de sesión
+
+La sesión se cierra sola por dos motivos, y la pantalla de ingreso dice cuál fue:
+
+- **Inactividad**: 30 minutos sin usar el sistema. Cada página que se abre reinicia
+  la cuenta. Es por el computador del patio, que queda encendido y a la vista.
+- **Tiempo máximo**: 12 horas desde que se entró, se esté usando o no.
+
+Los dos plazos se ajustan en el `.env` con `SESION_INACTIVIDAD_MIN` y
+`SESION_MAXIMA_HORAS`; cualquiera de los dos se apaga poniéndolo en `0`. Los
+aplica `cuentas/sesiones.py`.
+
 ## Cómo ejecutarlo
 
 El proyecto usa **PostgreSQL** y lee su configuración de un archivo `.env`
@@ -95,6 +107,8 @@ Abrir <http://127.0.0.1:8000> e iniciar sesión.
 | `ALLOWED_HOSTS` | Dominios permitidos, separados por comas |
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Credenciales de PostgreSQL |
 | `DB_HOST`, `DB_PORT` | Dónde escucha PostgreSQL (`localhost`, `5432`) |
+| `SESION_INACTIVIDAD_MIN` | Minutos sin actividad antes de cerrar la sesión (`0` lo apaga) |
+| `SESION_MAXIMA_HORAS` | Horas máximas de una sesión, se use o no (`0` lo apaga) |
 
 **Usuario inicial**: `admin` / `tejas2026` — cámbiala en Administración → Usuarios.
 

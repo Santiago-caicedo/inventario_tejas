@@ -828,6 +828,20 @@ table.tabla {
     linear-gradient(currentColor 0 0) 0 5px / 100% 3px no-repeat;
 }
 
+/* Sesión cerrada sola: es informativo, no un error del usuario, así que no
+   va en rojo. */
+.aviso-sesion {
+  background: var(--acento-velo);
+  color: var(--acento);
+  border: 1px solid var(--borde-firme);
+  border-radius: var(--r);
+  padding: 12px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+
 .error-general {
   background: var(--alarma-velo);
   color: var(--alarma);

@@ -40,6 +40,16 @@
         <div class="error-general" role="alert">Usuario o contraseña incorrectos. Revisa e intenta de nuevo.</div>
       {% endif %}
 
+      {% if request.GET.cerrada == 'inactividad' %}
+        <div class="aviso-sesion" role="status">
+          Cerramos tu sesión porque pasaste un rato sin usar el sistema. Vuelve a entrar.
+        </div>
+      {% elif request.GET.cerrada == 'limite' %}
+        <div class="aviso-sesion" role="status">
+          Tu sesión llegó al tiempo máximo permitido. Vuelve a entrar.
+        </div>
+      {% endif %}
+
       <form method="post">
         {% csrf_token %}
         <div class="form-grupo">

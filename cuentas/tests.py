@@ -1,10 +1,13 @@
 """Cada rol entra a lo suyo y solo a lo suyo."""
 
+import time
+
 from django.contrib.auth.models import Group, User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from cuentas.roles import INVENTARIO, PEDIDOS, ROLES, sincronizar_roles
+from cuentas.sesiones import INICIO, VISTO
 from inventario.models import Categoria, Producto
 from pedidos.models import Cliente, Pedido
 
@@ -353,3 +356,84 @@ class UsuariosDesdeElFrontTest(TestCase):
         self.assertContains(respuesta, 'No puedes desactivar tu propio usuario')
         self.jefe.refresh_from_db()
         self.assertTrue(self.jefe.is_active)
+
+
+@override_settings(SESION_INACTIVIDAD=30 * 60, SESION_MAXIMA=12 * 3600)
+class CierreDeSesionTest(TestCase):
+    """La sesión se cierra sola: por estar quieta y por llevar demasiado abierta."""
+
+    CLAVE = 'planta-2026-teja'
+
+    @classmethod
+    def setUpTestData(cls):
+        sincronizar_roles()
+        cls.bodeguero = User.objects.create_user('bodeguero', password=cls.CLAVE)
+        cls.bodeguero.groups.add(Group.objects.get(name=INVENTARIO))
+
+    def envejecer(self, **marcas):
+        """Retrasa los relojes de la sesión para no tener que esperar de verdad."""
+        sesion = self.client.session
+        sesion.update(marcas)
+        sesion.save()
+
+    def test_una_sesion_en_uso_no_se_toca(self):
+        self.client.force_login(self.bodeguero)
+        self.assertEqual(self.client.get(reverse('productos_lista')).status_code, 200)
+
+    def test_se_cierra_tras_un_rato_sin_actividad(self):
+        self.client.force_login(self.bodeguero)
+        self.envejecer(**{VISTO: time.time() - 31 * 60})
+        self.assertRedirects(
+            self.client.get(reverse('productos_lista')),
+            f'{reverse("login")}?cerrada=inactividad',
+        )
+
+    def test_cada_movimiento_renueva_el_plazo_de_inactividad(self):
+        self.client.force_login(self.bodeguero)
+        self.envejecer(**{VISTO: time.time() - 29 * 60})
+        self.assertEqual(self.client.get(reverse('productos_lista')).status_code, 200)
+        # Al entrar se reinició el contador: 29 minutos después sigue viva.
+        self.envejecer(**{VISTO: time.time() - 29 * 60})
+        self.assertEqual(self.client.get(reverse('productos_lista')).status_code, 200)
+
+    def test_se_cierra_al_llegar_al_tiempo_maximo_aunque_se_este_usando(self):
+        self.client.force_login(self.bodeguero)
+        self.envejecer(**{INICIO: time.time() - 13 * 3600, VISTO: time.time()})
+        self.assertRedirects(
+            self.client.get(reverse('productos_lista')),
+            f'{reverse("login")}?cerrada=limite',
+        )
+
+    def test_al_cerrarse_hay_que_volver_a_identificarse(self):
+        self.client.force_login(self.bodeguero)
+        self.envejecer(**{VISTO: time.time() - 31 * 60})
+        self.client.get(reverse('productos_lista'))
+        # La sesión quedó vacía: el siguiente intento va al login, no al tablero.
+        self.assertRedirects(
+            self.client.get(reverse('productos_lista')),
+            f'{reverse("login")}?next={reverse("productos_lista")}',
+        )
+
+    @override_settings(SESION_INACTIVIDAD=0, SESION_MAXIMA=0)
+    def test_los_dos_plazos_se_pueden_apagar(self):
+        self.client.force_login(self.bodeguero)
+        self.envejecer(**{INICIO: time.time() - 200 * 3600, VISTO: time.time() - 200 * 3600})
+        self.assertEqual(self.client.get(reverse('productos_lista')).status_code, 200)
+
+    def test_una_sesion_vieja_sin_marcas_no_echa_a_nadie(self):
+        """Al desplegar esto, quien ya estaba adentro no debe salir disparado."""
+        self.client.force_login(self.bodeguero)
+        sesion = self.client.session
+        del sesion[INICIO], sesion[VISTO]
+        sesion.save()
+        self.assertEqual(self.client.get(reverse('productos_lista')).status_code, 200)
+
+    def test_la_pantalla_de_ingreso_explica_por_que_se_cerro(self):
+        self.assertContains(
+            self.client.get(f'{reverse("login")}?cerrada=inactividad'), 'sin usar el sistema'
+        )
+        self.assertContains(
+            self.client.get(f'{reverse("login")}?cerrada=limite'), 'tiempo máximo'
+        )
+        # Sin el parámetro no aparece ningún aviso.
+        self.assertNotContains(self.client.get(reverse('login')), 'aviso-sesion')

@@ -116,18 +116,42 @@ def etiqueta_rol(clave):
     return COMBINACIONES.get(clave, ('Sin rol', ()))[0]
 
 
-def aplicar_rol(usuario, clave):
-    """Deja al usuario exactamente con el rol elegido, sin restos del anterior."""
+class RolesSinCrear(Exception):
+    """Los grupos de rol no existen en esta base de datos.
+
+    Pasa cuando se despliega el código sin correr `migrate`: los grupos se
+    crean ahí (ver `cuentas/apps.py`). Sin este aviso el usuario se guardaría
+    con el rol en blanco y sin ningún error a la vista.
+    """
+
+    def __init__(self, faltan):
+        self.faltan = faltan
+        super().__init__(
+            f'Los roles todavía no existen en esta base de datos (faltan: {faltan}).'
+        )
+
+
+def grupos_del_rol(clave):
+    """Los grupos que corresponden al rol, comprobando que existan de verdad."""
     from django.contrib.auth.models import Group
 
     _, nombres = COMBINACIONES[clave]
+    grupos = list(Group.objects.filter(name__in=nombres))
+    if len(grupos) != len(nombres):
+        raise RolesSinCrear(', '.join(sorted(set(nombres) - {g.name for g in grupos})))
+    return grupos
+
+
+def aplicar_rol(usuario, clave):
+    """Deja al usuario exactamente con el rol elegido, sin restos del anterior."""
+    grupos = grupos_del_rol(clave)
     es_admin = clave == ADMINISTRADOR
     usuario.is_superuser = es_admin
     # `is_staff` es lo que abre /admin/. Va junto con el rol de administrador:
     # los roles de operación trabajan solo dentro de la aplicación.
     usuario.is_staff = es_admin
     usuario.save(update_fields=['is_superuser', 'is_staff'])
-    usuario.groups.set(Group.objects.filter(name__in=nombres))
+    usuario.groups.set(grupos)
 
 
 def sincronizar_roles():

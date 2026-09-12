@@ -313,6 +313,25 @@ class UsuariosDesdeElFrontTest(TestCase):
         self.assertFalse(self.bodeguero.is_active)
         self.assertFalse(self.client.login(username='bodeguero', password=self.CLAVE))
 
+    # --- servidor a medio desplegar ---
+
+    def test_si_faltan_los_grupos_lo_dice_en_vez_de_crear_a_alguien_sin_rol(self):
+        """Reproduce un servidor con el código nuevo pero sin correr `migrate`.
+
+        Antes el usuario se creaba y el rol se perdía en silencio.
+        """
+        Group.objects.all().delete()
+        self.client.force_login(self.jefe)
+        respuesta = self.client.post(reverse('usuario_crear'), self.datos())
+        self.assertContains(respuesta, 'migrate')
+        self.assertFalse(User.objects.filter(username='jperez').exists())
+
+    def test_el_administrador_no_depende_de_que_existan_los_grupos(self):
+        Group.objects.all().delete()
+        self.client.force_login(self.jefe)
+        self.client.post(reverse('usuario_crear'), self.datos(rol='admin'))
+        self.assertTrue(User.objects.get(username='jperez').is_superuser)
+
     # --- no cerrarse la puerta a uno mismo ---
 
     def test_no_puede_quitarse_su_propio_rol_de_administrador(self):

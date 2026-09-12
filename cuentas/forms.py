@@ -4,7 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 
 from inventario.forms import FormBase
 
-from .roles import ADMINISTRADOR, aplicar_rol, opciones_de_rol, rol_de
+from .roles import (ADMINISTRADOR, RolesSinCrear, aplicar_rol, grupos_del_rol,
+                    opciones_de_rol, rol_de)
 
 
 class UsuarioForm(FormBase):
@@ -78,6 +79,14 @@ class UsuarioForm(FormBase):
             raise forms.ValidationError(
                 'No puedes quitarte a ti mismo el rol de administrador: te quedarías '
                 'sin poder entrar a esta pantalla. Pídeselo a otro administrador.'
+            )
+        try:
+            grupos_del_rol(rol)
+        except RolesSinCrear as error:
+            # Servidor con el código nuevo pero sin migrar. Antes de este aviso
+            # el usuario se creaba bien y el rol se perdía en silencio.
+            raise forms.ValidationError(
+                f'{error} Corre «manage.py migrate» en este servidor y vuelve a intentarlo.'
             )
         return rol
 
